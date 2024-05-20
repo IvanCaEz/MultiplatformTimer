@@ -110,7 +110,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     animationOn = hasStarted,
                 )
             }
-            Spacer(modifier = Modifier.padding(12.dp))
+            Spacer(modifier = Modifier.padding(4.dp))
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center) {
                 ElevatedButton(onClick = {
@@ -179,6 +179,18 @@ fun CoolCircularProgressBar(
         val strokeWidthPx = strokeWidth.toPx()
         val arcSize = size.toPx() - strokeWidthPx
 
+        // Background Arc
+        drawArc(
+            color = backgroundArcColor,
+            startAngle = startAngle,
+            sweepAngle = 250f,
+            useCenter = false,
+            topLeft = Offset(strokeWidthPx / 2, strokeWidthPx / 2),
+            size = Size(arcSize, arcSize),
+            style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+        )
+
+        // Progress Arc
         drawArc(
             brush = gradientBrush,
             startAngle = startAngle,
