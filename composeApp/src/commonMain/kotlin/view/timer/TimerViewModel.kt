@@ -7,6 +7,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import soundplayer.SoundPlayer
 import view.set_timer.Field
 
 class TimerViewModel(
@@ -23,6 +24,15 @@ class TimerViewModel(
     val isWorkTime = _isWorkTime.asStateFlow()
 
     private var timerJob: Job? = null
+
+    private val soundPlayer = SoundPlayer()
+
+    private fun playSound() {
+        soundPlayer.playSound("interval_sound")
+    }
+    fun stopSound() {
+        soundPlayer.stopSound()
+    }
 
 
     fun startTimer() {
@@ -41,6 +51,7 @@ class TimerViewModel(
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (_intervals.value > 0) {
+
                 // Empieza el tiempo de trabajo
                 if (_isWorkTime.value) {
                     if (_isPaused.value) {
@@ -48,10 +59,16 @@ class TimerViewModel(
                     } else {
                         _remainingTime.value = _workTime.value
                     }
+
                     while (_remainingTime.value > 0 ) {
                         delay(1000)
                         _remainingTime.value--
+                        if (_remainingTime.value == 4) {
+                            println("AAAAA")
+                            playSound()
+                        }
                     }
+
                     if (_remainingTime.value == 0) {
                         _isWorkTime.value = false
                     }
@@ -61,10 +78,16 @@ class TimerViewModel(
                     } else {
                         _remainingTime.value = _restTime.value
                     }
+
                     while (_remainingTime.value > 0 ) {
                         delay(1000)
                         _remainingTime.value--
+
+                        if (_remainingTime.value == 4) {
+                            playSound()
+                        }
                     }
+
                     if (_remainingTime.value == 0) {
                         _intervals.value--
                         _isWorkTime.value = true

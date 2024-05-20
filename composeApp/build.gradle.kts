@@ -3,10 +3,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     kotlin("plugin.serialization")
-
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
+    ios() // This adds the iOS target
+
     androidTarget {
         compilations.all {
             kotlinOptions {
@@ -25,15 +27,19 @@ kotlin {
             isStatic = true
         }
     }
+
+
     
     sourceSets {
-        
+
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             // Koin
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+            // MediaPlayer
+            implementation(libs.androidx.media)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -51,8 +57,12 @@ kotlin {
             implementation(libs.navigation.compose)
             // Serialization
             implementation(libs.kotlinx.serialization.json)
-            
+
         }
+        val iosMain by getting {
+            dependsOn(commonMain.get())
+        }
+
     }
 }
 
