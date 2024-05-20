@@ -39,9 +39,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -50,11 +50,10 @@ import kotlinx.coroutines.flow.flow
 @Composable
 fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
     val intervals by timerViewModel.intervals.collectAsState()
-    val restTimeTimer by timerViewModel.restTimeTimer.collectAsState()
-    val workTimeTimer by timerViewModel.workTimeTimer.collectAsState()
     val isWorkTime by timerViewModel.isWorkTime.collectAsState()
     val hasStarted by timerViewModel.hasStarted.collectAsState()
     val isPaused by timerViewModel.isPaused.collectAsState()
+    val remainingTime by timerViewModel.remainingTime.collectAsState()
 
     Scaffold(topBar = {
         TopAppBar(
@@ -67,7 +66,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
                         navController.popBackStack()
-                    }
+                    }.size(32.dp)
                 )
             })
     }){ paddingValues ->
@@ -85,16 +84,16 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
             Box(contentAlignment = Alignment.Center,
             modifier = Modifier.wrapContentSize()
             ) {
-                Text(text = if (isWorkTime) workTimeTimer.toString() else restTimeTimer.toString(),
-                    style = MaterialTheme.typography.headlineLarge)
+                Text(text = remainingTime.toString(),
+                    fontSize = 42.sp)
 
                 CoolCircularProgressBar(
                     size = 250.dp,
                     strokeWidth = 16.dp,
                     progress = if (isWorkTime) {
-                        workTimeTimer.toFloat() / timerViewModel.workTime.value
+                        remainingTime.toFloat() / timerViewModel.workTime.value
                     } else {
-                        restTimeTimer.toFloat() / timerViewModel.restTime.value
+                        remainingTime.toFloat() / timerViewModel.restTime.value
                     },
                     startAngle = -215f,
                     backgroundArcColor = Color.LightGray,
@@ -111,7 +110,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     animationOn = hasStarted,
                 )
             }
-            Spacer(modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.padding(12.dp))
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center) {
                 ElevatedButton(onClick = {
@@ -126,45 +125,23 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                 }
                 AnimatedContent(isPaused){
                     if (isPaused) {
-                        Spacer(modifier = Modifier.padding(10.dp))
-                        ElevatedButton(onClick = { timerViewModel.stopTimer() },
-                            colors = ButtonDefaults.elevatedButtonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onTertiary
-                            )) {
-                            Text(text = "Detener")
+                        Row(modifier = Modifier.padding(start = 10.dp)){
+                            ElevatedButton(onClick = { timerViewModel.stopTimer() },
+                                colors = ButtonDefaults.elevatedButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiary,
+                                    contentColor = MaterialTheme.colorScheme.onTertiary
+                                )) {
+                                Text(text = "Detener")
+                            }
                         }
+
                     }
                 }
             }
-
-
         }
     }
-
 }
 
-
-
-/*CircularProgressIndicator(
-    progress = { if (isWorkTime) {
-        workTimeTimer.toFloat() / timerViewModel.workTime.value
-    } else {
-        restTimeTimer.toFloat() / timerViewModel.restTime.value
-    }
-    },
-    modifier = Modifier.size(250.dp),
-    trackColor = Color.LightGray,
-    color = if (isWorkTime) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.tertiary
-    },
-    strokeCap = StrokeCap.Round,
-    strokeWidth = 10.dp
-)
-
-*/
 
 @Composable
 fun CoolCircularProgressBar(
@@ -197,24 +174,21 @@ fun CoolCircularProgressBar(
 
     Canvas(modifier = Modifier.size(size)) {
         val gradientBrush = Brush.verticalGradient(
-            colors = listOf(progressArcColor1, progressArcColor2, progressArcColor1)
+            colors = listOf(progressArcColor1, progressArcColor2)
         )
         val strokeWidthPx = strokeWidth.toPx()
         val arcSize = size.toPx() - strokeWidthPx
-        // Background Arc Implementation
-        withTransform({
-            rotate(degrees = startAngle, pivot = center)
-        }) {
-            drawArc(
-                brush = gradientBrush,
-                startAngle = startAngle,
-                sweepAngle = animatedProgress * 360,
-                useCenter = false,
-                topLeft = Offset(strokeWidthPx / 2, strokeWidthPx / 2),
-                size = Size(arcSize, arcSize),
-                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
-            )
-        }
+
+        drawArc(
+            brush = gradientBrush,
+            startAngle = startAngle,
+            sweepAngle = animatedProgress * 250,
+            useCenter = false,
+            topLeft = Offset(strokeWidthPx / 2, strokeWidthPx / 2),
+            size = Size(arcSize, arcSize),
+            style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+        )
+
     }
 }
 
