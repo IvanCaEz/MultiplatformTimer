@@ -1,6 +1,5 @@
 package view.timer
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -66,6 +65,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
+                        timerViewModel.stopTimer()
                         navController.popBackStack()
                     }.size(32.dp)
                 )
@@ -85,7 +85,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
             Box(contentAlignment = Alignment.Center,
             modifier = Modifier.wrapContentSize()
             ) {
-                Text(text = remainingTime.toString(),
+                Text(text = timerViewModel.formatTime(remainingTime),
                     fontSize = 42.sp)
 
                 CoolCircularProgressBar(
@@ -99,14 +99,14 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     startAngle = -215f,
                     backgroundArcColor = Color.LightGray,
                     progressArcColor1 = if (isWorkTime) {
-                        MaterialTheme.colorScheme.secondary
+                        MaterialTheme.colorScheme.secondaryContainer
                     } else {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.primaryContainer
                     },
                     progressArcColor2 = if (isWorkTime) {
-                        MaterialTheme.colorScheme.tertiary
+                        MaterialTheme.colorScheme.primaryContainer
                     } else {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.tertiary
                     },
                     animationOn = hasStarted,
                 )
@@ -128,18 +128,16 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     else if (hasStarted && isPaused) Text(text = "Reanudar")
                     else Text(text = "Empezar")
                 }
-                AnimatedContent(isPaused){
-                    if (isPaused) {
-                        Row(modifier = Modifier.padding(start = 10.dp)){
-                            ElevatedButton(onClick = { timerViewModel.stopTimer() },
-                                colors = ButtonDefaults.elevatedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiary,
-                                    contentColor = MaterialTheme.colorScheme.onTertiary
-                                )) {
-                                Text(text = "Detener")
-                            }
+                if (isPaused) {
+                    println("Hola")
+                    Row(modifier = Modifier.padding(start = 10.dp)){
+                        ElevatedButton(onClick = { timerViewModel.stopTimer() },
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )) {
+                            Text(text = "Detener")
                         }
-
                     }
                 }
             }
@@ -155,8 +153,8 @@ fun CoolCircularProgressBar(
     progress: Float = 0f,
     startAngle: Float = -215f,
     backgroundArcColor: Color = Color.LightGray,
-    progressArcColor1: Color = Color.Blue,
-    progressArcColor2: Color = progressArcColor1,
+    progressArcColor1: Color,
+    progressArcColor2: Color,
     animationOn: Boolean = false,
 ) {
 

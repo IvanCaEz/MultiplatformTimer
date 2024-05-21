@@ -119,10 +119,13 @@ class TimerViewModel(
     }
 
     fun stopTimer() {
+         stopSound()
         _intervals.value = 0
         _workTimeTimer.value = 0
         _restTimeTimer.value = 0
+        _remainingTime.value = 0
         _hasStarted.value = false
+        _isWorkTime.value = true
         _isPaused.value = false
         timerJob?.cancel()
     }
@@ -190,12 +193,8 @@ class TimerViewModel(
     }
 
     private val _restTimeTimer = MutableStateFlow(0)
-    val restTimeTimer = _restTimeTimer.asStateFlow()
-
 
     private val _workTimeTimer = MutableStateFlow(0)
-    val workTimeTimer = _workTimeTimer.asStateFlow()
-
 
     override fun onCleared() {
         super.onCleared()
@@ -212,6 +211,16 @@ class TimerViewModel(
 
     fun selectField(field: Field) {
         _selectedField.value = field
+    }
+
+    fun formatTime(seconds: Int): String {
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+        return if (minutes > 0) {
+            "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
+        } else {
+            remainingSeconds.toString()
+        }
     }
 
 }
