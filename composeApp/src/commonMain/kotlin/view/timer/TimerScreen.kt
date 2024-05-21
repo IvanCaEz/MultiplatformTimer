@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.flow
 @Composable
 fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
     val intervals by timerViewModel.intervals.collectAsState()
+    val intervalsOriginal by timerViewModel.intervalsOriginal.collectAsState()
     val isWorkTime by timerViewModel.isWorkTime.collectAsState()
     val hasStarted by timerViewModel.hasStarted.collectAsState()
     val isPaused by timerViewModel.isPaused.collectAsState()
@@ -74,7 +75,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Text(text = "Intérvalo $intervals", style = MaterialTheme.typography.headlineLarge)
+            Text(text = "Intérvalo ${if (intervals == intervalsOriginal) intervalsOriginal else intervals + 1}/$intervalsOriginal", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.padding(8.dp))
             Text(text = if (isWorkTime) "Tiempo de trabajo" else "Tiempo de descanso",
                 style = MaterialTheme.typography.headlineLarge)
@@ -98,9 +99,9 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     startAngle = -215f,
                     backgroundArcColor = Color.LightGray,
                     progressArcColor1 = if (isWorkTime) {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.secondary
                     } else {
-                        MaterialTheme.colorScheme.tertiary
+                        MaterialTheme.colorScheme.primary
                     },
                     progressArcColor2 = if (isWorkTime) {
                         MaterialTheme.colorScheme.tertiary
@@ -113,7 +114,11 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
             Spacer(modifier = Modifier.padding(4.dp))
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center) {
-                ElevatedButton(onClick = {
+                ElevatedButton(
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary),
+                    onClick = {
                     if(hasStarted && !isPaused) timerViewModel.pauseTimer()
                     else if (hasStarted && isPaused) timerViewModel.resumeTimer()
                     else timerViewModel.startTimer()
@@ -145,8 +150,8 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
 
 @Composable
 fun CoolCircularProgressBar(
-    size: Dp = 96.dp,
-    strokeWidth: Dp = 12.dp,
+    size: Dp,
+    strokeWidth: Dp,
     progress: Float = 0f,
     startAngle: Float = -215f,
     backgroundArcColor: Color = Color.LightGray,

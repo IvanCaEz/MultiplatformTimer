@@ -30,17 +30,16 @@ class TimerViewModel(
     private fun playSound() {
         soundPlayer.playSound("interval_sound")
     }
-    fun stopSound() {
+    private fun stopSound() {
         soundPlayer.stopSound()
     }
 
 
     fun startTimer() {
         _hasStarted.value = true
-        _intervals.value = _intervalsOriginal.value
+        _intervals.value = 0
         _workTimeTimer.value = _workTime.value
         _restTimeTimer.value = _restTime.value
-        _intervals.value = _intervalsOriginal.value
         _isPaused.value = false
         _remainingTime.value = if (_isWorkTime.value) _workTimeTimer.value else _restTimeTimer.value
         startTimerJob()
@@ -50,7 +49,7 @@ class TimerViewModel(
     private fun startTimerJob(){
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            while (_intervals.value > 0) {
+            while (_intervals.value != _intervalsOriginal.value) {
 
                 // Empieza el tiempo de trabajo
                 if (_isWorkTime.value) {
@@ -60,16 +59,15 @@ class TimerViewModel(
                         _remainingTime.value = _workTime.value
                     }
 
-                    while (_remainingTime.value > 0 ) {
+                    while (_remainingTime.value > -1 ) {
                         delay(1000)
                         _remainingTime.value--
-                        if (_remainingTime.value == 4) {
-                            println("AAAAA")
+                        if (_remainingTime.value == 3) {
                             playSound()
                         }
                     }
 
-                    if (_remainingTime.value == 0) {
+                    if (_remainingTime.value == -1) {
                         _isWorkTime.value = false
                     }
                 } else {
@@ -79,21 +77,22 @@ class TimerViewModel(
                         _remainingTime.value = _restTime.value
                     }
 
-                    while (_remainingTime.value > 0 ) {
+                    while (_remainingTime.value > -1 ) {
                         delay(1000)
                         _remainingTime.value--
 
-                        if (_remainingTime.value == 4) {
+                        if (_remainingTime.value == 3) {
                             playSound()
                         }
                     }
 
-                    if (_remainingTime.value == 0) {
-                        _intervals.value--
+                    if (_remainingTime.value == -1) {
+                        _intervals.value++
                         _isWorkTime.value = true
                     }
-                    if (_intervals.value == 0) {
+                    if (_intervals.value == _intervalsOriginal.value) {
                         _hasStarted.value = false
+                        _remainingTime.value = 0
                     }
                 }
             }
@@ -105,6 +104,7 @@ class TimerViewModel(
 
     fun pauseTimer() {
         _isPaused.value = true
+        stopSound()
         if (_isWorkTime.value) {
             _workTimeTimer.value = _remainingTime.value
         } else {
@@ -205,6 +205,13 @@ class TimerViewModel(
     fun setTimer(restTime: Int, workTime: Int) {
         _restTime.value = restTime
         _workTime.value = workTime
+    }
+
+    private val _selectedField = MutableStateFlow(Field.ROUNDS)
+    val selectedField = _selectedField.asStateFlow()
+
+    fun selectField(field: Field) {
+        _selectedField.value = field
     }
 
 }

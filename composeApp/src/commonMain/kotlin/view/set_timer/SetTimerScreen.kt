@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,7 +42,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
     val workSeconds by timerViewModel.workSeconds.collectAsState()
     val restMinutes by timerViewModel.restMinutes.collectAsState()
     val restSeconds by timerViewModel.restSeconds.collectAsState()
-    var selectedField by remember { mutableStateOf(Field.ROUNDS) }
+    val selectedField by timerViewModel.selectedField.collectAsState()
     var isPadVisible by remember { mutableStateOf(false) }
 
 
@@ -56,7 +57,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 .clip(RoundedCornerShape(16.dp))
                 .background(if (selectedField == Field.ROUNDS) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
                 .clickable {
-                    selectedField = Field.ROUNDS
+                    timerViewModel.selectField(Field.ROUNDS)
                     isPadVisible = false
                 }
             ) {
@@ -94,7 +95,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 value = "$workMinutes:$workSeconds",
                 selected = selectedField == Field.WORK,
                 onClick = {
-                    selectedField = Field.WORK
+                    timerViewModel.selectField(Field.WORK)
                     isPadVisible = true
                 }
             )
@@ -106,7 +107,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 value = "$restMinutes:$restSeconds",
                 selected = selectedField == Field.REST,
                 onClick = {
-                    selectedField = Field.REST
+                    timerViewModel.selectField(Field.REST)
                     isPadVisible = true
                 }
             )
@@ -152,7 +153,12 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
 
             Spacer(modifier = Modifier.padding(4.dp))
             // Botón de empezar
-            ElevatedButton(onClick = {
+            ElevatedButton(
+                colors = ButtonDefaults.elevatedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                onClick = {
                 val totalWorkTime = workMinutes.toInt() * 60 + workSeconds.toInt()
                 val totalRestTime = restMinutes.toInt() * 60 + restSeconds.toInt()
                 timerViewModel.setTimer(totalRestTime, totalWorkTime)
@@ -244,7 +250,7 @@ fun NumberButton(number: String, onClick: () -> Unit) {
         Text(
             text = number,
             fontSize = 24.sp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
