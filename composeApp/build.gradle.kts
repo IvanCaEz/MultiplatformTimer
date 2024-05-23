@@ -3,11 +3,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     kotlin("plugin.serialization")
+    alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
     applyDefaultHierarchyTemplate()
-    ios() // This adds the iOS target
 
     androidTarget {
         compilations.all {
@@ -57,6 +58,9 @@ kotlin {
             implementation(libs.navigation.compose)
             // Serialization
             implementation(libs.kotlinx.serialization.json)
+            // Room
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
 
         }
         val iosMain by getting {
@@ -100,3 +104,10 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    ksp(libs.room.compiler)
+}

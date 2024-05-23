@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import database.SessionDatabase
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.currentKoinScope
@@ -17,21 +18,29 @@ import ui.theme.lightScheme
 import view.set_timer.SetTimerScreen
 import view.timer.TimerScreen
 import view.timer.TimerViewModel
+import view.timer_list.TimerListScreen
 
 @Composable
 @Preview
-fun App() {
+fun App(sessionDatabase: SessionDatabase) {
 
     val colors by mutableStateOf(if (isSystemInDarkTheme()) darkScheme else lightScheme)
 
     MaterialTheme(colorScheme = colors) {
         val navHost = rememberNavController()
+        //val sessions by sessionDao.getAllSessions().collectAsState(initial = emptyList())
         KoinContext {
             val timerViewModel = koinViewModel<TimerViewModel>()
 
-            NavHost(navController = navHost, startDestination = "SetUpScreen") {
+
+
+            NavHost(navController = navHost, startDestination = "TimerListScreen") {
+
+                composable("TimerListScreen") {
+                    TimerListScreen(navHost, timerViewModel, sessionDatabase)
+                }
                 composable("SetUpScreen") {
-                    SetTimerScreen(navHost, timerViewModel)
+                    SetTimerScreen(navHost, timerViewModel, sessionDatabase)
                 }
 
                 composable("TimerScreen") {

@@ -1,6 +1,11 @@
 package com.ivancaez.cooltimer.ui.theme
 import androidx.compose.ui.graphics.Color
 
+val WorkTimeColor = Color(0xFFCD433E)
+val RestTimeColor = Color(0xFF82E06F)
+val WarmupTimeColor = Color(0xFFECC163)
+val CooldownTimeColor = Color(0xFF69A6FE)
+
 val primaryLight = Color(0xFF313131)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFF535353)

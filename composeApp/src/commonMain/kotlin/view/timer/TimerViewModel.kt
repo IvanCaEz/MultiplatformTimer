@@ -2,6 +2,8 @@ package view.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import database.Session
+import database.SessionDatabase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,14 +16,41 @@ class TimerViewModel(
     private val hello: String
 ): ViewModel() {
 
+    private val _sessionList = MutableStateFlow(listOf<Session>())
+    val sessionList = _sessionList.asStateFlow()
+
+    fun setSessionList(sessionList: List<Session>) {
+        _sessionList.value = sessionList
+    }
+
+    fun addSession(session: Session, sessionDatabase: SessionDatabase) {
+        println(session)
+        viewModelScope.launch {
+            sessionDatabase.sessionDao().upsertSession(session)
+        }
+    }
+
+    fun deleteSession(session: Session, sessionDatabase: SessionDatabase) {
+        viewModelScope.launch {
+            sessionDatabase.sessionDao().deleteSession(session)
+        }
+    }
+
+
     private val _remainingTime = MutableStateFlow(0)
     val remainingTime = _remainingTime.asStateFlow()
 
     private val _hasStarted = MutableStateFlow(false)
     val hasStarted = _hasStarted.asStateFlow()
 
-    private val _isWorkTime = MutableStateFlow(true)
+    private val _isWorkTime = MutableStateFlow(false)
     val isWorkTime = _isWorkTime.asStateFlow()
+
+    private val _isWarmupTime = MutableStateFlow(false)
+    val isWarmupTime = _isWarmupTime.asStateFlow()
+
+    private val _isCooldownTime = MutableStateFlow(false)
+    val isCooldownTime = _isCooldownTime.asStateFlow()
 
     private var timerJob: Job? = null
 
@@ -40,8 +69,15 @@ class TimerViewModel(
         _intervals.value = 0
         _workTimeTimer.value = _workTime.value
         _restTimeTimer.value = _restTime.value
+        _warmupTimeTimer.value = _warmupTime.value
+        _cooldownTimeTimer.value = _cooldownTime.value
         _isPaused.value = false
-        _remainingTime.value = if (_isWorkTime.value) _workTimeTimer.value else _restTimeTimer.value
+        _isWarmupTime.value = _warmupTimeTimer.value > 0
+        _remainingTime.value = if (_isWarmupTime.value) {
+            _warmupTimeTimer.value
+        } else {
+            _workTimeTimer.value
+        }
         startTimerJob()
 
     }
@@ -50,6 +86,23 @@ class TimerViewModel(
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (_intervals.value != _intervalsOriginal.value) {
+
+                if (_isWarmupTime.value) {
+                    if (_isPaused.value) {
+                        _remainingTime.value = _warmupTimeTimer.value
+                    } else {
+                        _remainingTime.value = _warmupTime.value
+                    }
+                    while (_remainingTime.value > -1 ) {
+                        delay(1000)
+                        _remainingTime.value--
+                        if (_remainingTime.value == 3) {
+                            playSound()
+                        }
+                    }
+                    _isWarmupTime.value = false
+                    _isWorkTime.value = true
+                }
 
                 // Empieza el tiempo de trabajo
                 if (_isWorkTime.value) {
@@ -91,9 +144,28 @@ class TimerViewModel(
                         _isWorkTime.value = true
                     }
                     if (_intervals.value == _intervalsOriginal.value) {
-                        _hasStarted.value = false
+
                         _remainingTime.value = 0
+                        _isCooldownTime.value = _cooldownTimeTimer.value > 0
+                        _hasStarted.value = _isCooldownTime.value
                     }
+                }
+
+                if (_isCooldownTime.value){
+                    if (_isPaused.value) {
+                        _remainingTime.value = _cooldownTimeTimer.value
+                    } else {
+                        _remainingTime.value = _cooldownTime.value
+                    }
+                    while (_remainingTime.value > -1 ) {
+                        delay(1000)
+                        _remainingTime.value--
+                        if (_remainingTime.value == 3) {
+                            playSound()
+                        }
+                    }
+                    _isCooldownTime.value = false
+                    _hasStarted.value = false
                 }
             }
         }
@@ -118,6 +190,12 @@ class TimerViewModel(
         _isPaused.value = false
     }
 
+    fun resetSetTimer() {
+        _intervalsOriginal.value = 0
+        _workTime.value = 0
+        _restTime.value = 0
+    }
+
     fun stopTimer() {
          stopSound()
         _intervals.value = 0
@@ -125,13 +203,28 @@ class TimerViewModel(
         _restTimeTimer.value = 0
         _remainingTime.value = 0
         _hasStarted.value = false
-        _isWorkTime.value = true
+        _isWorkTime.value = false
+        _isWarmupTime.value = true
         _isPaused.value = false
         timerJob?.cancel()
     }
 
+    private val _sessionName = MutableStateFlow("")
+    val sessionName = _sessionName.asStateFlow()
+
+    fun setSessionName(name: String) {
+        _sessionName.value = name
+    }
+
     private val _intervalsOriginal = MutableStateFlow(0)
     val intervalsOriginal = _intervalsOriginal.asStateFlow()
+
+    fun setSession(session: Session) {
+        _intervalsOriginal.value = session.intervals
+        _workTime.value = session.workTime
+        _restTime.value = session.restTime
+        _sessionName.value = session.sessionName
+    }
 
     fun addIntervals() {
         _intervalsOriginal.value++
@@ -154,6 +247,13 @@ class TimerViewModel(
     private val _workTime = MutableStateFlow(0)
     val workTime = _workTime.asStateFlow()
 
+    private val _warmupTime = MutableStateFlow(0)
+    val warmupTime = _warmupTime.asStateFlow()
+
+
+    private val _cooldownTime = MutableStateFlow(0)
+    val cooldownTime = _cooldownTime.asStateFlow()
+
 
     // Work Time Strings
     private val _workMinutes = MutableStateFlow("00")
@@ -169,6 +269,21 @@ class TimerViewModel(
     private val _restSeconds = MutableStateFlow("00")
     val restSeconds = _restSeconds.asStateFlow()
 
+    // WarmUp Time Strings
+    private val _warmupMinutes = MutableStateFlow("00")
+    val warmupMinutes = _warmupMinutes.asStateFlow()
+
+    private val _warmupSeconds = MutableStateFlow("00")
+    val warmupSeconds = _warmupSeconds.asStateFlow()
+
+    // Cooldown Time Strings
+    private val _cooldownMinutes = MutableStateFlow("00")
+    val cooldownMinutes = _cooldownMinutes.asStateFlow()
+
+    private val _cooldownSeconds = MutableStateFlow("00")
+    val cooldownSeconds = _cooldownSeconds.asStateFlow()
+
+
     /**
      * Sets the time for the selected field
      * @param which Field, the type of Field it is
@@ -177,6 +292,10 @@ class TimerViewModel(
      */
     fun setTime(which: Field, minutes: String, seconds: String) {
         when(which) {
+            Field.WARMUP -> {
+                _warmupMinutes.value = minutes
+                _warmupSeconds.value = seconds
+            }
             Field.WORK -> {
                 _workMinutes.value = minutes
                 _workSeconds.value = seconds
@@ -185,12 +304,23 @@ class TimerViewModel(
                 _restMinutes.value = minutes
                 _restSeconds.value = seconds
             }
+            Field.COOLDOWN -> {
+                _cooldownMinutes.value = minutes
+                _cooldownSeconds.value = seconds
+            }
             Field.ROUNDS -> {
+
+            }
+            Field.NAME -> {
 
             }
         }
 
     }
+
+    private val _warmupTimeTimer = MutableStateFlow(0)
+
+    private val _cooldownTimeTimer = MutableStateFlow(0)
 
     private val _restTimeTimer = MutableStateFlow(0)
 
@@ -201,12 +331,14 @@ class TimerViewModel(
         timerJob?.cancel()
     }
 
-    fun setTimer(restTime: Int, workTime: Int) {
+    fun setTimer(restTime: Int, workTime: Int, warmupTime: Int, cooldownTime: Int) {
         _restTime.value = restTime
         _workTime.value = workTime
+        _warmupTime.value = warmupTime
+        _cooldownTime.value = cooldownTime
     }
 
-    private val _selectedField = MutableStateFlow(Field.ROUNDS)
+    private val _selectedField = MutableStateFlow(Field.NAME)
     val selectedField = _selectedField.asStateFlow()
 
     fun selectField(field: Field) {

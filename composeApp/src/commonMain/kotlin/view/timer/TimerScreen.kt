@@ -51,6 +51,8 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
     val intervals by timerViewModel.intervals.collectAsState()
     val intervalsOriginal by timerViewModel.intervalsOriginal.collectAsState()
     val isWorkTime by timerViewModel.isWorkTime.collectAsState()
+    val isCooldownTime by timerViewModel.isCooldownTime.collectAsState()
+    val isWarmupTime by timerViewModel.isWarmupTime.collectAsState()
     val hasStarted by timerViewModel.hasStarted.collectAsState()
     val isPaused by timerViewModel.isPaused.collectAsState()
     val remainingTime by timerViewModel.remainingTime.collectAsState()
@@ -98,11 +100,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     },
                     startAngle = -215f,
                     backgroundArcColor = Color.LightGray,
-                    progressArcColor1 = if (isWorkTime) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.primaryContainer
-                    },
+                    progressArcColor1 = MaterialTheme.colorScheme.secondaryContainer,
                     progressArcColor2 = if (isWorkTime) {
                         MaterialTheme.colorScheme.primaryContainer
                     } else {
