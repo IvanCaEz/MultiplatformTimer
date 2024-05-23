@@ -132,9 +132,9 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                         focusManager.clearFocus()
                     },
                     timerViewModel = timerViewModel,
+                    focusManager = focusManager,
                     isValid = intervalValid
                 )
-
 
             // WarmUp and Cooldown times
             Row(modifier = Modifier.fillMaxWidth(),
@@ -193,8 +193,6 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                     isValid = restTimeValid
                 )
             }
-
-
 
             Spacer(modifier = Modifier.padding(4.dp))
 
@@ -351,6 +349,7 @@ fun IntervalsInputField(
     selected: Boolean,
     onClick: () -> Unit,
     timerViewModel: TimerViewModel,
+    focusManager: FocusManager,
     isValid: Boolean) {
     Box(
         modifier = modifier
@@ -373,14 +372,22 @@ fun IntervalsInputField(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
                 ) {
-                SquareButton("-") { timerViewModel.removeIntervals() }
+                SquareButton("-") {
+                    timerViewModel.selectField(Field.ROUNDS)
+                    timerViewModel.removeIntervals()
+                    focusManager.clearFocus()
+                }
                 Text(
                     modifier = Modifier.padding(start = 4.dp, end = 4.dp),
                     text = value,
                     fontSize = 24.sp,
                     textAlign = TextAlign.Center
                 )
-                SquareButton("+") { timerViewModel.addIntervals() }
+                SquareButton("+") {
+                    timerViewModel.selectField(Field.ROUNDS)
+                    timerViewModel.addIntervals()
+                    focusManager.clearFocus()
+                }
             }
         }
     }
