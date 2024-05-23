@@ -28,7 +28,7 @@ Go to [Releases](https://github.com/IvanCaEz/MultiplatformTimer/releases) to dow
 - [Material-Components](https://github.com/material-components/material-components-android?tab=readme-ov-file): Material design components for building UI components.
 
 ## Demo
-https://github.com/IvanCaEz/MultiplatformTimer/assets/125135728/acde734a-624c-49d1-a1b3-ed61cd6db9e7
+https://github.com/IvanCaEz/MultiplatformTimer/assets/125135728/73f2c848-4247-4028-9eb5-4e25607c4179
 
 ## License
 ````
