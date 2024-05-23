@@ -72,8 +72,8 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        timerViewModel.stopTimer()
                         navController.popBackStack()
+                        timerViewModel.stopTimer()
                     }.size(32.dp)
                 )
             })

@@ -6,10 +6,10 @@ import androidx.room.PrimaryKey
 @Entity
 data class Session(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val sessionName: String,
-    val intervals: Int,
-    val warmupTime: Int? = 0,
-    val workTime: Int,
-    val restTime: Int,
-    val cooldownTime: Int? = 0
+    var sessionName: String,
+    var intervals: Int,
+    var warmupTime: Int? = 0,
+    var workTime: Int,
+    var restTime: Int,
+    var cooldownTime: Int? = 0
 )

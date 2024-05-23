@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.ButtonDefaults
@@ -28,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ivancaez.cooltimer.ui.theme.WorkTimeColor
 import data.Field
 import database.Session
 import database.SessionDatabase
@@ -67,10 +71,16 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
     val cooldownMinutes by timerViewModel.cooldownMinutes.collectAsState()
     val cooldownSeconds by timerViewModel.cooldownSeconds.collectAsState()
 
+    // Control de errores
+    val intervalValid by timerViewModel.intervalsValid.collectAsState()
+    val workTimeValid by timerViewModel.workTimeValid.collectAsState()
+    val restTimeValid by timerViewModel.restTimeValid.collectAsState()
+    val canProceed by timerViewModel.canProceed.collectAsState()
     val selectedField by timerViewModel.selectedField.collectAsState()
     var isPadVisible by remember { mutableStateOf(false) }
     val sessionName by timerViewModel.sessionName.collectAsState()
     val focusManager = LocalFocusManager.current
+    val verticalSroll = rememberScrollState()
 
     Scaffold (topBar = {
         TopAppBar(
@@ -82,13 +92,15 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        timerViewModel.resetSetTimer()
                         navController.popBackStack()
+                        timerViewModel.resetSetTimer()
                     }.size(32.dp)
                 )
             })
     }){ paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues),
+        Column(modifier = Modifier.fillMaxSize()
+            .padding(paddingValues)
+            .verticalScroll(verticalSroll),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
@@ -119,7 +131,8 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                         isPadVisible = false
                         focusManager.clearFocus()
                     },
-                    timerViewModel = timerViewModel
+                    timerViewModel = timerViewModel,
+                    isValid = intervalValid
                 )
 
 
@@ -163,7 +176,8 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                         isPadVisible = true
                         focusManager.clearFocus()
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isValid = workTimeValid
                 )
 
                 TimeInputField(
@@ -175,7 +189,8 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                         isPadVisible = true
                         focusManager.clearFocus()
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isValid = restTimeValid
                 )
             }
 
@@ -255,9 +270,27 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 onClick = {
                     val totalWorkTime = workMinutes.toInt() * 60 + workSeconds.toInt()
                     val totalRestTime = restMinutes.toInt() * 60 + restSeconds.toInt()
-                    val totalWarmupTime = warmupMinutes.toInt() * 60 + warmupSeconds.toInt()
-                    val totalCooldownTime = cooldownMinutes.toInt() * 60 + cooldownSeconds.toInt()
-                    val newSession = Session(
+                    timerViewModel.validateSession(intervals, totalWorkTime, totalRestTime)
+            }) {
+                Text("Iniciar Timer")
+            }
+        }
+        LaunchedEffect(canProceed) {
+            if (canProceed) {
+                val totalWorkTime = workMinutes.toInt() * 60 + workSeconds.toInt()
+                val totalRestTime = restMinutes.toInt() * 60 + restSeconds.toInt()
+                val totalWarmupTime = warmupMinutes.toInt() * 60 + warmupSeconds.toInt()
+                val totalCooldownTime = cooldownMinutes.toInt() * 60 + cooldownSeconds.toInt()
+                var session = timerViewModel.currentSession
+                if (session != null) {
+                    session.sessionName = sessionName
+                    session.intervals = intervals
+                    session.warmupTime = totalWarmupTime
+                    session.workTime = totalWorkTime
+                    session.restTime = totalRestTime
+                    session.cooldownTime = totalCooldownTime
+                } else {
+                    session = Session(
                         sessionName = sessionName,
                         intervals = intervals,
                         warmupTime = totalWarmupTime,
@@ -265,23 +298,29 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                         restTime = totalRestTime,
                         cooldownTime = totalCooldownTime
                     )
-                    timerViewModel.setTimer(newSession)
-                    timerViewModel.addSession(newSession, sessionDatabase)
-                    navController.navigate("TimerScreen")
-            }) {
-                Text("Iniciar Timer")
+                }
+                timerViewModel.setTimer(session)
+                timerViewModel.addSession(session, sessionDatabase)
+                navController.navigate("TimerScreen")
             }
         }
     }
 }
 
 @Composable
-fun TimeInputField(label: String, value: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
+fun TimeInputField(
+    label: String,
+    value: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    isValid: Boolean = true
+) {
     Box(
         modifier = modifier
             .padding(4.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
+            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else if (!isValid) WorkTimeColor else Color.Transparent)
             .clickable { onClick() }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
@@ -311,13 +350,14 @@ fun IntervalsInputField(
     value: String,
     selected: Boolean,
     onClick: () -> Unit,
-    timerViewModel: TimerViewModel) {
+    timerViewModel: TimerViewModel,
+    isValid: Boolean) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
+            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else if (!isValid) WorkTimeColor else Color.Transparent)
             .clickable { onClick() }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,

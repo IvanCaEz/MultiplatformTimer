@@ -30,13 +30,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ivancaez.cooltimer.ui.theme.CooldownTimeColor
+import com.ivancaez.cooltimer.ui.theme.WarmupTimeColor
 import database.SessionDatabase
 import view.timer.TimerViewModel
 
@@ -67,7 +71,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "No hay sesiones guardadas, crea una",
+                    text = "No hay sesiones guardadas",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.padding(8.dp))
@@ -78,24 +82,52 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
             ) {
                 items(sessions.size) { index ->
                     val session = sessions[index]
+                    println(session)
                     Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                             .wrapContentHeight()
                             .clickable {
                                 timerViewModel.setTimer(session)
                                 navController.navigate("TimerScreen")
                             },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(24.dp),
                     ) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
                             // Info de la sesión
-                            Column(modifier = Modifier.padding(end = 4.dp).weight(4f)) {
+                            Column(modifier = Modifier.padding(end = 4.dp).weight(3.5f)) {
                                 // Nombre de la sesión
                                 Text(
-                                    text = session.sessionName,
+                                    text = buildAnnotatedString {
+                                        withStyle(
+                                            style = SpanStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.tertiary
+                                            )
+                                        ) {
+                                            append(session.sessionName.ifEmpty { "Sesión #${session.id}" })
+                                        }
+                                        withStyle(
+                                            style = SpanStyle(
+                                                fontSize = 18.sp,
+                                                color = MaterialTheme.colorScheme.primary
+                                                )
+                                        ) {
+                                            append(" - ")
+                                        }
+                                        withStyle(
+                                            style = SpanStyle(
+                                                color = CooldownTimeColor,
+                                                fontSize = 18.sp,
+                                                fontStyle = FontStyle.Italic
+                                            )
+                                        ) {
+                                            val totalTime = session.intervals * (session.restTime+session.workTime)+ session.warmupTime!! + session.cooldownTime!!
+
+                                            append(timerViewModel.formatTime(totalTime) + if (totalTime > 60) " min" else " s")
+                                        }                                    },
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.tertiary
+                                    color = WarmupTimeColor
                                 )
                                 // Intérvalos
                                 Text(
@@ -122,7 +154,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                             ) {
                                                 append("Calentamiento: ")
                                             }
-                                            append(timerViewModel.formatTime(session.warmupTime!!))
+                                            append(timerViewModel.formatTime(session.warmupTime!!) + if (session.warmupTime!! > 60) " min" else " s")
                                         },
                                         fontSize = 18.sp
                                     )
@@ -137,7 +169,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                         ) {
                                             append("Tiempo de trabajo: ")
                                         }
-                                        append(timerViewModel.formatTime(session.workTime))
+                                        append(timerViewModel.formatTime(session.workTime) + if (session.workTime > 60) " min" else " s")
                                     },
                                     fontSize = 18.sp
                                 )
@@ -151,7 +183,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                         ) {
                                             append("Tiempo de descanso: ")
                                         }
-                                        append(timerViewModel.formatTime(session.restTime))
+                                        append(timerViewModel.formatTime(session.restTime) + if (session.restTime > 60) " min" else " s")
                                     },
                                     fontSize = 18.sp
                                 )
@@ -166,7 +198,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                             ) {
                                                 append("Enfriamiento: ")
                                             }
-                                            append(timerViewModel.formatTime(session.cooldownTime!!))
+                                            append(timerViewModel.formatTime(session.cooldownTime!!) + if (session.cooldownTime!! > 60) " min" else " s")
                                         },
                                         fontSize = 18.sp
                                     )
@@ -193,8 +225,8 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                 IconButton(
                                     modifier = Modifier.clip(CircleShape),
                                     colors = IconButtonDefaults.iconButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                                        containerColor = MaterialTheme.colorScheme.primary
+                                        contentColor = Color.White,
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
                                     ),
                                     onClick = {
                                         timerViewModel.deleteSession(session, sessionDatabase)

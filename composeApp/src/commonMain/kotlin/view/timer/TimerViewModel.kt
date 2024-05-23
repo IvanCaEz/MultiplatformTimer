@@ -23,6 +23,8 @@ class TimerViewModel(
         _sessionList.value = sessionList
     }
 
+    var currentSession: Session? = null
+
     fun addSession(session: Session, sessionDatabase: SessionDatabase) {
         println(session)
         viewModelScope.launch {
@@ -31,6 +33,7 @@ class TimerViewModel(
     }
 
     fun deleteSession(session: Session, sessionDatabase: SessionDatabase) {
+
         viewModelScope.launch {
             sessionDatabase.sessionDao().deleteSession(session)
         }
@@ -196,6 +199,9 @@ class TimerViewModel(
     }
 
     fun resetSetTimer() {
+        _canProceed.value = false
+        currentSession = null
+        _selectedField.value = Field.NAME
         _intervalsOriginal.value = 0
         _sessionName.value = ""
         // Work
@@ -228,6 +234,7 @@ class TimerViewModel(
         _isWarmupTime.value = false
         _isCooldownTime.value = false
         _isPaused.value = false
+        _canProceed.value = false
         timerJob?.cancel()
     }
 
@@ -242,10 +249,13 @@ class TimerViewModel(
     val intervalsOriginal = _intervalsOriginal.asStateFlow()
 
     /**
-     * Updates the string values with the session info, then calls [setTime] to update the time values
+     * Updates the string values with the session info and updates [currentSession] with the session to edit,
+     * then calls [setTime] to update the time values
      * @param session Session
      */
     fun setSession(session: Session) {
+        currentSession = session
+
         _intervalsOriginal.value = session.intervals
 
         _workSeconds.value = (session.workTime % 60).toString().padStart(2, '0')
@@ -390,6 +400,26 @@ class TimerViewModel(
 
     fun selectField(field: Field) {
         _selectedField.value = field
+    }
+
+
+    private val _intervalsValid = MutableStateFlow(true)
+    val intervalsValid = _intervalsValid.asStateFlow()
+
+    private val _workTimeValid = MutableStateFlow(true)
+    val workTimeValid = _workTimeValid.asStateFlow()
+
+    private val _restTimeValid = MutableStateFlow(true)
+    val restTimeValid = _restTimeValid.asStateFlow()
+
+    private val _canProceed = MutableStateFlow(false)
+    val canProceed = _canProceed.asStateFlow()
+
+    fun validateSession(intervals: Int, workTime: Int, restTime: Int) {
+        _workTimeValid.value = workTime > 0
+        _restTimeValid.value = restTime > 0
+        _intervalsValid.value = intervals > 0
+        _canProceed.value = _workTimeValid.value && _restTimeValid.value && _intervalsValid.value
     }
 
     /**
