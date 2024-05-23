@@ -45,11 +45,10 @@ import database.SessionDatabase
 import view.timer.TimerViewModel
 
 @Composable
-fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel, sessionDatabase: SessionDatabase) {
+fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel, sessionDatabase: SessionDatabase){
 
     val sessions by sessionDatabase.sessionDao().getAllSessions()
-        .collectAsState(initial = emptyList())
-    timerViewModel.setSessionList(sessions.toMutableList())
+        .collectAsState(initial = timerViewModel.sessionList.value)
 
     Scaffold(floatingActionButton = {
         FloatingActionButton(

@@ -2,6 +2,7 @@
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -31,12 +32,15 @@ fun App(sessionDatabase: SessionDatabase) {
         //val sessions by sessionDao.getAllSessions().collectAsState(initial = emptyList())
         KoinContext {
             val timerViewModel = koinViewModel<TimerViewModel>()
-
+            val sessions by sessionDatabase.sessionDao().getAllSessions()
+                .collectAsState(initial = emptyList())
+            timerViewModel.setSessionList(sessions)
 
 
             NavHost(navController = navHost, startDestination = "TimerListScreen") {
 
                 composable("TimerListScreen") {
+
                     TimerListScreen(navHost, timerViewModel, sessionDatabase)
                 }
                 composable("SetUpScreen") {
