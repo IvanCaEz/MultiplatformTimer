@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import data.Field
 import database.Session
 import database.SessionDatabase
 import view.timer.TimerViewModel
@@ -256,7 +257,6 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                     val totalRestTime = restMinutes.toInt() * 60 + restSeconds.toInt()
                     val totalWarmupTime = warmupMinutes.toInt() * 60 + warmupSeconds.toInt()
                     val totalCooldownTime = cooldownMinutes.toInt() * 60 + cooldownSeconds.toInt()
-                    timerViewModel.setTimer(totalRestTime, totalWorkTime, totalWarmupTime, totalCooldownTime)
                     val newSession = Session(
                         sessionName = sessionName,
                         intervals = intervals,
@@ -265,6 +265,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                         restTime = totalRestTime,
                         cooldownTime = totalCooldownTime
                     )
+                    timerViewModel.setTimer(newSession)
                     timerViewModel.addSession(newSession, sessionDatabase)
                     navController.navigate("TimerScreen")
             }) {
@@ -272,10 +273,6 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
             }
         }
     }
-}
-
-enum class Field {
-    NAME, ROUNDS, WARMUP, WORK, REST, COOLDOWN
 }
 
 @Composable
@@ -345,7 +342,6 @@ fun IntervalsInputField(
                 )
                 SquareButton("+") { timerViewModel.addIntervals() }
             }
-
         }
     }
 }
@@ -362,7 +358,9 @@ fun NameInputField(
             .padding(4.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
-            .clickable { onClick() }
+            .clickable {
+                onClick()
+            }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(8.dp)) {
@@ -380,12 +378,9 @@ fun NameInputField(
                     })
                 )
             }
-
         }
     }
 }
-
-
 @Composable
 fun NumberPad(onNumberClick: (String) -> Unit, onClearClick: () -> Unit) {
     Column(

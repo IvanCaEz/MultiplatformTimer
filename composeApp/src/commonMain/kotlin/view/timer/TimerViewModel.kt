@@ -2,6 +2,7 @@ package view.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import data.Field
 import database.Session
 import database.SessionDatabase
 import kotlinx.coroutines.Job
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import soundplayer.SoundPlayer
-import view.set_timer.Field
 
 class TimerViewModel(
     private val hello: String
@@ -72,10 +72,11 @@ class TimerViewModel(
         _warmupTimeTimer.value = _warmupTime.value
         _cooldownTimeTimer.value = _cooldownTime.value
         _isPaused.value = false
-        _isWarmupTime.value = _warmupTimeTimer.value > 0
+        _isWarmupTime.value = _warmupTimeTimer.value != 0
         _remainingTime.value = if (_isWarmupTime.value) {
             _warmupTimeTimer.value
         } else {
+            _isWorkTime.value = true
             _workTimeTimer.value
         }
         startTimerJob()
@@ -85,8 +86,9 @@ class TimerViewModel(
     private fun startTimerJob(){
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            while (_intervals.value != _intervalsOriginal.value) {
-
+            while (hasStarted.value) {
+                println(_hasStarted.value)
+                // Empieza el tiempo de calentamiento
                 if (_isWarmupTime.value) {
                     if (_isPaused.value) {
                         _remainingTime.value = _warmupTimeTimer.value
@@ -103,55 +105,8 @@ class TimerViewModel(
                     _isWarmupTime.value = false
                     _isWorkTime.value = true
                 }
-
-                // Empieza el tiempo de trabajo
-                if (_isWorkTime.value) {
-                    if (_isPaused.value) {
-                        _remainingTime.value = _workTimeTimer.value
-                    } else {
-                        _remainingTime.value = _workTime.value
-                    }
-
-                    while (_remainingTime.value > -1 ) {
-                        delay(1000)
-                        _remainingTime.value--
-                        if (_remainingTime.value == 3) {
-                            playSound()
-                        }
-                    }
-
-                    if (_remainingTime.value == -1) {
-                        _isWorkTime.value = false
-                    }
-                } else {
-                    if (_isPaused.value) {
-                        _remainingTime.value = _restTimeTimer.value
-                    } else {
-                        _remainingTime.value = _restTime.value
-                    }
-
-                    while (_remainingTime.value > -1 ) {
-                        delay(1000)
-                        _remainingTime.value--
-
-                        if (_remainingTime.value == 3) {
-                            playSound()
-                        }
-                    }
-
-                    if (_remainingTime.value == -1) {
-                        _intervals.value++
-                        _isWorkTime.value = true
-                    }
-                    if (_intervals.value == _intervalsOriginal.value) {
-
-                        _remainingTime.value = 0
-                        _isCooldownTime.value = _cooldownTimeTimer.value > 0
-                        _hasStarted.value = _isCooldownTime.value
-                    }
-                }
-
-                if (_isCooldownTime.value){
+                // Empieza el tiempo de enfriamiento
+                else if (_isCooldownTime.value){
                     if (_isPaused.value) {
                         _remainingTime.value = _cooldownTimeTimer.value
                     } else {
@@ -166,6 +121,51 @@ class TimerViewModel(
                     }
                     _isCooldownTime.value = false
                     _hasStarted.value = false
+                    _remainingTime.value = 0
+                }
+                // Empieza el tiempo de trabajo
+                else if (_isWorkTime.value) {
+                    if (_isPaused.value) {
+                        _remainingTime.value = _workTimeTimer.value
+                    } else {
+                        _remainingTime.value = _workTime.value
+                    }
+                    while (_remainingTime.value > -1 ) {
+                        delay(1000)
+                        _remainingTime.value--
+                        if (_remainingTime.value == 3) {
+                            playSound()
+                        }
+                    }
+                    if (_remainingTime.value == -1) {
+                        _isWorkTime.value = false
+                    }
+                // Empieza el tiempo de descanso
+                } else {
+                    if (_isPaused.value) {
+                        _remainingTime.value = _restTimeTimer.value
+                    } else {
+                        _remainingTime.value = _restTime.value
+                    }
+                    while (_remainingTime.value > -1 ) {
+                        delay(1000)
+                        _remainingTime.value--
+
+                        if (_remainingTime.value == 3) {
+                            playSound()
+                        }
+                    }
+                    if (_remainingTime.value == -1) {
+                        _intervals.value++
+                        if (_intervals.value == _intervalsOriginal.value) {
+                            _remainingTime.value = 0
+                            _isWorkTime.value = false
+                            _isCooldownTime.value = _cooldownTime.value != 0
+                            _hasStarted.value = _isCooldownTime.value
+                        } else {
+                            _isWorkTime.value = true
+                        }
+                    }
                 }
             }
         }
@@ -179,7 +179,12 @@ class TimerViewModel(
         stopSound()
         if (_isWorkTime.value) {
             _workTimeTimer.value = _remainingTime.value
-        } else {
+        } else if (_isCooldownTime.value){
+            _cooldownTimeTimer.value = _remainingTime.value
+        } else if (_isWarmupTime.value) {
+            _warmupTimeTimer.value = _remainingTime.value
+        }
+        else {
             _restTimeTimer.value = _remainingTime.value
         }
         timerJob?.cancel()
@@ -192,8 +197,24 @@ class TimerViewModel(
 
     fun resetSetTimer() {
         _intervalsOriginal.value = 0
+        _sessionName.value = ""
+        // Work
+        _workSeconds.value = "00"
+        _workMinutes.value = "00"
         _workTime.value = 0
+
+        // Rest
+        _restSeconds.value = "00"
+        _restMinutes.value = "00"
         _restTime.value = 0
+        // Warmup
+        _warmupSeconds.value = "00"
+        _warmupMinutes.value = "00"
+        _warmupTime.value = 0
+        // Cooldown
+        _cooldownSeconds.value = "00"
+        _cooldownMinutes.value = "00"
+        _cooldownTime.value = 0
     }
 
     fun stopTimer() {
@@ -204,7 +225,8 @@ class TimerViewModel(
         _remainingTime.value = 0
         _hasStarted.value = false
         _isWorkTime.value = false
-        _isWarmupTime.value = true
+        _isWarmupTime.value = false
+        _isCooldownTime.value = false
         _isPaused.value = false
         timerJob?.cancel()
     }
@@ -219,11 +241,31 @@ class TimerViewModel(
     private val _intervalsOriginal = MutableStateFlow(0)
     val intervalsOriginal = _intervalsOriginal.asStateFlow()
 
+    /**
+     * Updates the string values with the session info, then calls [setTime] to update the time values
+     * @param session Session
+     */
     fun setSession(session: Session) {
         _intervalsOriginal.value = session.intervals
-        _workTime.value = session.workTime
-        _restTime.value = session.restTime
+
+        _workSeconds.value = (session.workTime % 60).toString().padStart(2, '0')
+        _workMinutes.value = (session.workTime / 60).toString().padStart(2, '0')
+
+        _restSeconds.value = (session.restTime % 60).toString().padStart(2, '0')
+        _restMinutes.value = (session.restTime / 60).toString().padStart(2, '0')
+
+        _warmupSeconds.value = (session.warmupTime?.rem(60)).toString().padStart(2, '0')
+        _warmupMinutes.value = (session.warmupTime?.div(60)).toString().padStart(2, '0')
+
+        _cooldownSeconds.value = (session.cooldownTime?.rem(60)).toString().padStart(2, '0')
+        _cooldownMinutes.value = (session.cooldownTime?.div(60)).toString().padStart(2, '0')
+
         _sessionName.value = session.sessionName
+
+        setTime(Field.WARMUP, _warmupMinutes.value, _warmupSeconds.value)
+        setTime(Field.WORK, _workMinutes.value, _workSeconds.value)
+        setTime(Field.REST, _restMinutes.value, _restSeconds.value)
+        setTime(Field.COOLDOWN, _cooldownMinutes.value, _cooldownSeconds.value)
     }
 
     fun addIntervals() {
@@ -331,11 +373,16 @@ class TimerViewModel(
         timerJob?.cancel()
     }
 
-    fun setTimer(restTime: Int, workTime: Int, warmupTime: Int, cooldownTime: Int) {
-        _restTime.value = restTime
-        _workTime.value = workTime
-        _warmupTime.value = warmupTime
-        _cooldownTime.value = cooldownTime
+    /**
+     * Prepares the timer with the session values
+     * @param session Session
+     */
+    fun setTimer(session: Session) {
+        _intervalsOriginal.value = session.intervals
+        _restTime.value = session.restTime
+        _workTime.value = session.workTime
+        _warmupTime.value = session.warmupTime ?: 0
+        _cooldownTime.value = session.cooldownTime ?: 0
     }
 
     private val _selectedField = MutableStateFlow(Field.NAME)
@@ -345,6 +392,11 @@ class TimerViewModel(
         _selectedField.value = field
     }
 
+    /**
+     * Formats the time in seconds to a string in the format "mm:ss"
+     * @param seconds Int
+     * @return the formatted time as a string
+     */
     fun formatTime(seconds: Int): String {
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60
@@ -354,5 +406,6 @@ class TimerViewModel(
             remainingSeconds.toString()
         }
     }
+
 
 }

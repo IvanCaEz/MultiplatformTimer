@@ -82,7 +82,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                             .wrapContentHeight()
                             .clickable {
-                                timerViewModel.setSession(session)
+                                timerViewModel.setTimer(session)
                                 navController.navigate("TimerScreen")
                             },
                         shape = RoundedCornerShape(16.dp),

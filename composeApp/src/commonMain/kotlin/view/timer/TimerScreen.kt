@@ -38,10 +38,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ivancaez.cooltimer.ui.theme.CooldownTimeColor
+import com.ivancaez.cooltimer.ui.theme.RestTimeColor
+import com.ivancaez.cooltimer.ui.theme.WarmupTimeColor
+import com.ivancaez.cooltimer.ui.theme.WorkTimeColor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -79,8 +84,35 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
         ){
             Text(text = "Intérvalo ${if (intervals == intervalsOriginal) intervalsOriginal else intervals + 1}/$intervalsOriginal", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.padding(8.dp))
-            Text(text = if (isWorkTime) "Tiempo de trabajo" else "Tiempo de descanso",
-                style = MaterialTheme.typography.headlineLarge)
+            Text(text = if (isWorkTime) {
+                "Trabajo"
+            } else if (isCooldownTime){
+                "Enfriamiento"
+            } else if (isWarmupTime){
+                "Calentamiento"
+            } else if (intervals == intervalsOriginal && !hasStarted){
+                "¡Acabado!"
+            } else if (intervals != intervalsOriginal && !hasStarted) {
+                "Prepárate"
+            } else {
+                "Descanso"
+                   },
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (isWorkTime) {
+                    WorkTimeColor
+                } else if (isCooldownTime){
+                    CooldownTimeColor
+                } else if (isWarmupTime){
+                    WarmupTimeColor
+                }  else if (intervals == intervalsOriginal && !hasStarted){
+                    RestTimeColor
+                } else if (intervals != intervalsOriginal && !hasStarted) {
+                    WarmupTimeColor
+                } else {
+                    RestTimeColor
+                }
+                )
 
             Spacer(modifier = Modifier.padding(20.dp))
 
@@ -95,16 +127,25 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     strokeWidth = 16.dp,
                     progress = if (isWorkTime) {
                         remainingTime.toFloat() / timerViewModel.workTime.value
+                    } else if (isCooldownTime){
+                        remainingTime.toFloat() / timerViewModel.cooldownTime.value
+                    } else if (isWarmupTime){
+                        remainingTime.toFloat() / timerViewModel.warmupTime.value
                     } else {
                         remainingTime.toFloat() / timerViewModel.restTime.value
                     },
                     startAngle = -215f,
                     backgroundArcColor = Color.LightGray,
                     progressArcColor1 = MaterialTheme.colorScheme.secondaryContainer,
-                    progressArcColor2 = if (isWorkTime) {
-                        MaterialTheme.colorScheme.primaryContainer
+                    progressArcColor2 =
+                    if (isWorkTime) {
+                        WorkTimeColor
+                    } else if (isCooldownTime){
+                        CooldownTimeColor
+                    } else if (isWarmupTime){
+                        WarmupTimeColor
                     } else {
-                        MaterialTheme.colorScheme.tertiary
+                        RestTimeColor
                     },
                     animationOn = hasStarted,
                 )
@@ -127,7 +168,6 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     else Text(text = "Empezar")
                 }
                 if (isPaused) {
-                    println("Hola")
                     Row(modifier = Modifier.padding(start = 10.dp)){
                         ElevatedButton(onClick = { timerViewModel.stopTimer() },
                             colors = ButtonDefaults.elevatedButtonColors(
