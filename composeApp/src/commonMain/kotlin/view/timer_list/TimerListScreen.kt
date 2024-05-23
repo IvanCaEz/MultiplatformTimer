@@ -122,7 +122,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                         ) {
                                             val totalTime = session.intervals * (session.restTime+session.workTime)+ session.warmupTime!! + session.cooldownTime!!
 
-                                            append(timerViewModel.formatTime(totalTime) + if (totalTime > 60) " min" else " s")
+                                            append(timerViewModel.formatTime(totalTime) + if (totalTime > 59) " min" else " s")
                                         }                                    },
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
@@ -153,7 +153,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                             ) {
                                                 append("Calentamiento: ")
                                             }
-                                            append(timerViewModel.formatTime(session.warmupTime!!) + if (session.warmupTime!! > 60) " min" else " s")
+                                            append(timerViewModel.formatTime(session.warmupTime!!) + if (session.warmupTime!! > 59) " min" else " s")
                                         },
                                         fontSize = 18.sp
                                     )
@@ -168,7 +168,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                         ) {
                                             append("Tiempo de trabajo: ")
                                         }
-                                        append(timerViewModel.formatTime(session.workTime) + if (session.workTime > 60) " min" else " s")
+                                        append(timerViewModel.formatTime(session.workTime) + if (session.workTime > 59) " min" else " s")
                                     },
                                     fontSize = 18.sp
                                 )
@@ -182,7 +182,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                         ) {
                                             append("Tiempo de descanso: ")
                                         }
-                                        append(timerViewModel.formatTime(session.restTime) + if (session.restTime > 60) " min" else " s")
+                                        append(timerViewModel.formatTime(session.restTime) + if (session.restTime > 59) " min" else " s")
                                     },
                                     fontSize = 18.sp
                                 )
@@ -197,7 +197,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                             ) {
                                                 append("Enfriamiento: ")
                                             }
-                                            append(timerViewModel.formatTime(session.cooldownTime!!) + if (session.cooldownTime!! > 60) " min" else " s")
+                                            append(timerViewModel.formatTime(session.cooldownTime!!) + if (session.cooldownTime!! > 59) " min" else " s")
                                         },
                                         fontSize = 18.sp
                                     )
