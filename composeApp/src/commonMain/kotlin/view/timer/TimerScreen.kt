@@ -62,6 +62,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
     val isPaused by timerViewModel.isPaused.collectAsState()
     val remainingTime by timerViewModel.remainingTime.collectAsState()
 
+
     Scaffold(topBar = {
         TopAppBar(
             title = {

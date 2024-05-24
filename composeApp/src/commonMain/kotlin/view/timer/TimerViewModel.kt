@@ -10,30 +10,43 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import notifications.TimerNotificationManager
 import soundplayer.SoundPlayer
 
 class TimerViewModel(
-    private val hello: String
+    private val timerNotificationManager: TimerNotificationManager
 ): ViewModel() {
 
     private val _sessionList = MutableStateFlow(listOf<Session>())
     val sessionList = _sessionList.asStateFlow()
 
+    /**
+     * Sets [_sessionList] to the given list
+     * @param sessionList List<Session>
+     */
     fun setSessionList(sessionList: List<Session>) {
         _sessionList.value = sessionList
     }
 
     var currentSession: Session? = null
 
+    /**
+     * Adds a session to the database
+     * @param session Session
+     * @param sessionDatabase SessionDatabase
+     */
     fun addSession(session: Session, sessionDatabase: SessionDatabase) {
-        println(session)
         viewModelScope.launch {
             sessionDatabase.sessionDao().upsertSession(session)
         }
     }
 
+    /**
+     * Deletes a session from the database
+     * @param session Session
+     * @param sessionDatabase SessionDatabase
+     */
     fun deleteSession(session: Session, sessionDatabase: SessionDatabase) {
-
         viewModelScope.launch {
             sessionDatabase.sessionDao().deleteSession(session)
         }
@@ -59,6 +72,7 @@ class TimerViewModel(
 
     private val soundPlayer = SoundPlayer()
 
+
     private fun playSound() {
         soundPlayer.playSound("interval_sound")
     }
@@ -66,7 +80,9 @@ class TimerViewModel(
         soundPlayer.stopSound()
     }
 
-
+    /**
+     * Starts the timer setting the needed values to their initial values and calls [startTimerJob]
+     */
     fun startTimer() {
         _hasStarted.value = true
         _intervals.value = 0
@@ -86,11 +102,18 @@ class TimerViewModel(
 
     }
 
+    /**
+     * Starts the timer job that will update the timer notification and the timer values,
+     * will check what period currently is and will update the remaining time accordingly.
+     */
     private fun startTimerJob(){
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
+            timerNotificationManager.startTimerNotification(
+                remainingTime = remainingTime.value,
+                period = if (_isWarmupTime.value) "Calentamiento" else "Trabajo"
+            )
             while (hasStarted.value) {
-                println(_hasStarted.value)
                 // Empieza el tiempo de calentamiento
                 if (_isWarmupTime.value) {
                     if (_isPaused.value) {
@@ -100,6 +123,7 @@ class TimerViewModel(
                     }
                     while (_remainingTime.value > -1 ) {
                         delay(1000)
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Calentamiento")
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
@@ -107,6 +131,7 @@ class TimerViewModel(
                     }
                     _isWarmupTime.value = false
                     _isWorkTime.value = true
+
                 }
                 // Empieza el tiempo de enfriamiento
                 else if (_isCooldownTime.value){
@@ -117,6 +142,7 @@ class TimerViewModel(
                     }
                     while (_remainingTime.value > -1 ) {
                         delay(1000)
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Enfriamiento")
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
@@ -125,6 +151,7 @@ class TimerViewModel(
                     _isCooldownTime.value = false
                     _hasStarted.value = false
                     _remainingTime.value = 0
+
                 }
                 // Empieza el tiempo de trabajo
                 else if (_isWorkTime.value) {
@@ -135,6 +162,7 @@ class TimerViewModel(
                     }
                     while (_remainingTime.value > -1 ) {
                         delay(1000)
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Trabajo")
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
@@ -152,8 +180,8 @@ class TimerViewModel(
                     }
                     while (_remainingTime.value > -1 ) {
                         delay(1000)
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Descanso")
                         _remainingTime.value--
-
                         if (_remainingTime.value == 3) {
                             playSound()
                         }
@@ -171,12 +199,17 @@ class TimerViewModel(
                     }
                 }
             }
+            timerNotificationManager.stopTimerNotification()
         }
     }
 
     private val _isPaused = MutableStateFlow(false)
     val isPaused = _isPaused.asStateFlow()
 
+    /**
+     * Pauses the timer and saves the remaining time for the current period,
+     * also stops the sound and clears the notification
+     */
     fun pauseTimer() {
         _isPaused.value = true
         stopSound()
@@ -191,13 +224,20 @@ class TimerViewModel(
             _restTimeTimer.value = _remainingTime.value
         }
         timerJob?.cancel()
+        timerNotificationManager.stopTimerNotification()
     }
 
+    /**
+     * Resumes the timer calling [startTimerJob] and setting the value of [_isPaused] to false
+     */
     fun resumeTimer() {
         startTimerJob()
         _isPaused.value = false
     }
 
+    /**
+     * Resets the timer values to their initial values in the setup screen and clears the [currentSession]
+     */
     fun resetSetTimer() {
         _canProceed.value = false
         currentSession = null
@@ -223,6 +263,9 @@ class TimerViewModel(
         _cooldownTime.value = 0
     }
 
+    /**
+     * Stops the timer and clears the values
+     */
     fun stopTimer() {
          stopSound()
         _intervals.value = 0
@@ -236,6 +279,7 @@ class TimerViewModel(
         _isPaused.value = false
         _canProceed.value = false
         timerJob?.cancel()
+        timerNotificationManager.stopTimerNotification()
     }
 
     private val _sessionName = MutableStateFlow("")
@@ -306,6 +350,7 @@ class TimerViewModel(
     private val _cooldownTime = MutableStateFlow(0)
     val cooldownTime = _cooldownTime.asStateFlow()
 
+    // SetUp Screen Values
 
     // Work Time Strings
     private val _workMinutes = MutableStateFlow("00")
@@ -370,6 +415,7 @@ class TimerViewModel(
 
     }
 
+    // Timers
     private val _warmupTimeTimer = MutableStateFlow(0)
 
     private val _cooldownTimeTimer = MutableStateFlow(0)
@@ -402,6 +448,7 @@ class TimerViewModel(
         _selectedField.value = field
     }
 
+    // Error control
 
     private val _intervalsValid = MutableStateFlow(true)
     val intervalsValid = _intervalsValid.asStateFlow()
@@ -415,6 +462,12 @@ class TimerViewModel(
     private val _canProceed = MutableStateFlow(false)
     val canProceed = _canProceed.asStateFlow()
 
+    /**
+     * Checks if the minimun session values are valid and sets the values of the valid variables as well as [canProceed]
+     * @param intervals Int -> The number of intervals
+     * @param workTime Int -> The time for the work period
+     * @param restTime Int -> The time for the rest period
+     */
     fun validateSession(intervals: Int, workTime: Int, restTime: Int) {
         _workTimeValid.value = workTime > 0
         _restTimeValid.value = restTime > 0
@@ -436,6 +489,5 @@ class TimerViewModel(
             remainingSeconds.toString()
         }
     }
-
 
 }

@@ -82,8 +82,8 @@ android {
         applicationId = "org.ivancaez.cooltimer"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 3
+        versionName = "2.1"
     }
     packaging {
         resources {
@@ -109,5 +109,6 @@ room {
 }
 
 dependencies {
+    implementation(libs.androidx.navigation.common.ktx)
     ksp(libs.room.compiler)
 }

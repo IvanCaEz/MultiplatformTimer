@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDeepLink
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,7 +30,7 @@ fun App(sessionDatabase: SessionDatabase) {
 
     MaterialTheme(colorScheme = colors) {
         val navHost = rememberNavController()
-        //val sessions by sessionDao.getAllSessions().collectAsState(initial = emptyList())
+
         KoinContext {
             val timerViewModel = koinViewModel<TimerViewModel>()
             val sessions by sessionDatabase.sessionDao().getAllSessions()
@@ -47,16 +48,14 @@ fun App(sessionDatabase: SessionDatabase) {
                     SetTimerScreen(navHost, timerViewModel, sessionDatabase)
                 }
 
-                composable("TimerScreen") {
+                composable("TimerScreen", deepLinks = listOf(
+                    NavDeepLink("CoolTimer://TimerScreen")
+                ))  {
                     TimerScreen(navHost, timerViewModel)
                 }
             }
-
-
         }
     }
-
-
 }
 
 @Composable
