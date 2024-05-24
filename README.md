@@ -22,7 +22,8 @@ Go to [Releases](https://github.com/IvanCaEz/MultiplatformTimer/releases) to dow
   - Lifecycle: Observes Android lifecycles and manages UI states upon lifecycle changes.
   - ViewModel: Manages UI-related data and is lifecycle-aware, ensuring data survival through configuration changes.
   - Navigation: Facilitates screen navigation.
-  - [Room](https://developer.android.com/training/data-storage/room): Saves data in a local database using SQLite  
+  - [Room](https://developer.android.com/training/data-storage/room): Saves data in a local database using SQLite.
+  - [Koin](https://insert-koin.io): For dependency injection.
 - Architecture
   - MVVM Architecture (View - Model - ViewModel)
 - [Material-Components](https://github.com/material-components/material-components-android?tab=readme-ov-file): Material design components for building UI components.
