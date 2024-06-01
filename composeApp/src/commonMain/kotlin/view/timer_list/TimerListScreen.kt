@@ -202,6 +202,17 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                         fontSize = 18.sp
                                     )
                                 }
+                                /*
+                                SessionVisualizer(
+                                    warmupTime = session.warmupTime ?: 0,
+                                    workTime = session.workTime,
+                                    restTime = session.restTime,
+                                    intervals = session.intervals,
+                                    cooldownTime = session.cooldownTime ?: 0,
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                                )
+                                 */
+
                             }
                             // Botones de editar y borrar
                             Column(modifier = Modifier.padding(end = 4.dp).weight(0.5f),
@@ -248,3 +259,61 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
         }
     }
 }
+
+/*
+@Composable
+fun SessionVisualizer(
+    warmupTime: Int,
+    workTime: Int,
+    restTime: Int,
+    intervals: Int,
+    cooldownTime: Int,
+    modifier: Modifier = Modifier
+) {
+    val totalTime = warmupTime + (workTime + restTime) * intervals + cooldownTime
+
+    Canvas(modifier = modifier.fillMaxWidth().height(20.dp)) {
+        val widthPerSecond = size.width / totalTime
+
+        var currentX = 0f
+
+        // Warmup time
+        if (warmupTime > 0){
+            drawRect(
+                color = WarmupTimeColor,
+                topLeft = Offset(currentX, 0f),
+                size = Size(warmupTime * widthPerSecond, size.height)
+            )
+            currentX += warmupTime * widthPerSecond
+        }
+
+        // Intervals
+        for (i in 0 until intervals) {
+            // Work time
+            drawRect(
+                color = WorkTimeColor,
+                topLeft = Offset(currentX, 0f),
+                size = Size(workTime * widthPerSecond, size.height)
+            )
+            currentX += workTime * widthPerSecond
+
+            // Rest time
+            drawRect(
+                color = RestTimeColor,
+                topLeft = Offset(currentX, 0f),
+                size = Size(restTime * widthPerSecond, size.height)
+            )
+            currentX += restTime * widthPerSecond
+        }
+
+        // Cooldown time
+        if (cooldownTime > 0){
+            drawRect(
+                color = CooldownTimeColor,
+                topLeft = Offset(currentX, 0f),
+                size = Size(cooldownTime * widthPerSecond, size.height)
+            )
+        }
+    }
+}
+ */

@@ -188,7 +188,7 @@ class TimerViewModel(
                     }
                     if (_remainingTime.value == -1) {
                         _intervals.value++
-                        if (_intervals.value == _intervalsOriginal.value) {
+                        if (_intervals.value == _intervalsOriginal.value.toInt()) {
                             _remainingTime.value = 0
                             _isWorkTime.value = false
                             _isCooldownTime.value = _cooldownTime.value != 0
@@ -242,7 +242,7 @@ class TimerViewModel(
         _canProceed.value = false
         currentSession = null
         _selectedField.value = Field.NAME
-        _intervalsOriginal.value = 0
+        _intervalsOriginal.value = "0"
         _sessionName.value = ""
         // Work
         _workSeconds.value = "00"
@@ -289,8 +289,10 @@ class TimerViewModel(
         _sessionName.value = name
     }
 
-    private val _intervalsOriginal = MutableStateFlow(0)
+    private val _intervalsOriginal = MutableStateFlow("0")
     val intervalsOriginal = _intervalsOriginal.asStateFlow()
+
+
 
     /**
      * Updates the string values with the session info and updates [currentSession] with the session to edit,
@@ -300,7 +302,7 @@ class TimerViewModel(
     fun setSession(session: Session) {
         currentSession = session
 
-        _intervalsOriginal.value = session.intervals
+        _intervalsOriginal.value = session.intervals.toString()
 
         _workSeconds.value = (session.workTime % 60).toString().padStart(2, '0')
         _workMinutes.value = (session.workTime / 60).toString().padStart(2, '0')
@@ -323,13 +325,17 @@ class TimerViewModel(
     }
 
     fun addIntervals() {
-        _intervalsOriginal.value++
+        _intervalsOriginal.value = (_intervalsOriginal.value.toInt() + 1).toString()
     }
 
     fun removeIntervals() {
-        if (_intervalsOriginal.value > 0) {
-            _intervalsOriginal.value--
+        if (_intervalsOriginal.value.toInt() > 0) {
+            _intervalsOriginal.value = (_intervalsOriginal.value.toInt() - 1).toString()
         }
+    }
+
+    fun setIntervals(intervals: String) {
+        _intervalsOriginal.value = intervals
     }
 
     private val _intervals = MutableStateFlow(0)
@@ -434,7 +440,7 @@ class TimerViewModel(
      * @param session Session
      */
     fun setTimer(session: Session) {
-        _intervalsOriginal.value = session.intervals
+        _intervalsOriginal.value = session.intervals.toString()
         _restTime.value = session.restTime
         _workTime.value = session.workTime
         _warmupTime.value = session.warmupTime ?: 0

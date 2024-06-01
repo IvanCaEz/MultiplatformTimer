@@ -1,6 +1,7 @@
 package view.set_timer
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text2.BasicTextField2
+import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -42,8 +46,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,13 +132,14 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 IntervalsInputField(
                     modifier = Modifier,
                     label = "Intérvalos",
-                    value = intervals.toString(),
+                    value = intervals,
                     selected = selectedField == Field.ROUNDS,
                     onClick = {
                         timerViewModel.selectField(Field.ROUNDS)
                         isPadVisible = false
                         focusManager.clearFocus()
                     },
+                    onValueChange = { timerViewModel.setIntervals(it) },
                     timerViewModel = timerViewModel,
                     focusManager = focusManager,
                     isValid = intervalValid
@@ -268,7 +277,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 onClick = {
                     val totalWorkTime = workMinutes.toInt() * 60 + workSeconds.toInt()
                     val totalRestTime = restMinutes.toInt() * 60 + restSeconds.toInt()
-                    timerViewModel.validateSession(intervals, totalWorkTime, totalRestTime)
+                    timerViewModel.validateSession(intervals.toInt(), totalWorkTime, totalRestTime)
             }) {
                 Text("Iniciar Timer")
             }
@@ -282,7 +291,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 var session = timerViewModel.currentSession
                 if (session != null) {
                     session.sessionName = sessionName
-                    session.intervals = intervals
+                    session.intervals = intervals.toInt()
                     session.warmupTime = totalWarmupTime
                     session.workTime = totalWorkTime
                     session.restTime = totalRestTime
@@ -290,7 +299,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 } else {
                     session = Session(
                         sessionName = sessionName,
-                        intervals = intervals,
+                        intervals = intervals.toInt(),
                         warmupTime = totalWarmupTime,
                         workTime = totalWorkTime,
                         restTime = totalRestTime,
@@ -341,6 +350,7 @@ fun TimeInputField(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IntervalsInputField(
     modifier: Modifier,
@@ -348,6 +358,7 @@ fun IntervalsInputField(
     value: String,
     selected: Boolean,
     onClick: () -> Unit,
+    onValueChange: (String) -> Unit,
     timerViewModel: TimerViewModel,
     focusManager: FocusManager,
     isValid: Boolean) {
@@ -377,12 +388,23 @@ fun IntervalsInputField(
                     timerViewModel.removeIntervals()
                     focusManager.clearFocus()
                 }
-                Text(
-                    modifier = Modifier.padding(start = 4.dp, end = 4.dp),
-                    text = value,
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.Center
+                BasicTextField2(
+                    modifier = modifier.clickable { onClick() }.wrapContentSize(),
+                    value = value,
+                    onValueChange = onValueChange,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    textStyle = TextStyle(fontSize = 24.sp, textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface
+                        ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                        ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+                    keyboardActions = KeyboardActions(onNext = {
+                        focusManager.clearFocus()
+                    })
                 )
+
                 SquareButton("+") {
                     timerViewModel.selectField(Field.ROUNDS)
                     timerViewModel.addIntervals()
@@ -418,8 +440,11 @@ fun NameInputField(
                     modifier = modifier.fillMaxWidth(),
                     value = value,
                     onValueChange = onValueChange,
+                    singleLine = true,
                     label = { Text(label) },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences
+                        ),
                     keyboardActions = KeyboardActions(onNext = {
                         focusManager.clearFocus()
                     })

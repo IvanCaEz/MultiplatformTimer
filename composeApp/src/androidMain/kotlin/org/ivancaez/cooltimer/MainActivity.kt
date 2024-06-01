@@ -21,16 +21,20 @@ import androidx.core.content.ContextCompat
 import org.ivancaez.cooltimer.database.getSessionDatabase
 
 class MainActivity : ComponentActivity() {
+
+    //val localActivity = staticCompositionLocalOf<Activity> { error("No Activity found!") }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val sessionDatabase = getSessionDatabase(applicationContext)
 
 
-
         setContent {
-            NotificationLauncher()
-            App(sessionDatabase)
+            //CompositionLocalProvider(localActivity provides this) {
+                NotificationLauncher()
+                App(sessionDatabase)
+            //}
         }
     }
 }

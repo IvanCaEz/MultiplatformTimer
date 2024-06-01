@@ -83,7 +83,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Text(text = "Intérvalo ${if (intervals == intervalsOriginal) intervalsOriginal else intervals + 1}/$intervalsOriginal", style = MaterialTheme.typography.headlineLarge)
+            Text(text = "Intérvalo ${if (intervals == intervalsOriginal.toInt()) intervalsOriginal else intervals + 1}/$intervalsOriginal", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.padding(8.dp))
             Text(text = if (isWorkTime) {
                 "Trabajo"
@@ -91,9 +91,9 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                 "Enfriamiento"
             } else if (isWarmupTime){
                 "Calentamiento"
-            } else if (intervals == intervalsOriginal && !hasStarted){
+            } else if (intervals == intervalsOriginal.toInt() && !hasStarted){
                 "¡Acabado!"
-            } else if (intervals != intervalsOriginal && !hasStarted) {
+            } else if (intervals != intervalsOriginal.toInt() && !hasStarted) {
                 "Prepárate"
             } else {
                 "Descanso"
@@ -106,9 +106,9 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     CooldownTimeColor
                 } else if (isWarmupTime){
                     WarmupTimeColor
-                }  else if (intervals == intervalsOriginal && !hasStarted){
+                }  else if (intervals == intervalsOriginal.toInt() && !hasStarted){
                     RestTimeColor
-                } else if (intervals != intervalsOriginal && !hasStarted) {
+                } else if (intervals != intervalsOriginal.toInt() && !hasStarted) {
                     WarmupTimeColor
                 } else {
                     RestTimeColor
@@ -216,8 +216,8 @@ fun CoolCircularProgressBar(
 
     Canvas(modifier = Modifier.size(size)) {
         val gradientBrush = Brush.verticalGradient(
-            colors = listOf(progressArcColor1, progressArcColor2)
-        )
+        colors = listOf(progressArcColor1, progressArcColor2)
+    )
         val strokeWidthPx = strokeWidth.toPx()
         val arcSize = size.toPx() - strokeWidthPx
 
