@@ -123,8 +123,8 @@ class TimerViewModel(
                         _remainingTime.value = _warmupTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        delay(1000)
                         timerNotificationManager.updateTimerNotification(remainingTime.value, "Calentamiento")
+                        delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
@@ -142,8 +142,8 @@ class TimerViewModel(
                         _remainingTime.value = _cooldownTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        delay(1000)
                         timerNotificationManager.updateTimerNotification(remainingTime.value, "Enfriamiento")
+                        delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
@@ -162,8 +162,8 @@ class TimerViewModel(
                         _remainingTime.value = _workTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        delay(1000)
                         timerNotificationManager.updateTimerNotification(remainingTime.value, "Trabajo")
+                        delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
@@ -180,8 +180,8 @@ class TimerViewModel(
                         _remainingTime.value = _restTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        delay(1000)
                         timerNotificationManager.updateTimerNotification(remainingTime.value, "Descanso")
+                        delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
                             playSound()
