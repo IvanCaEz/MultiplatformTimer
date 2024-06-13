@@ -24,7 +24,7 @@ import view.timer_list.TimerListScreen
 
 @Composable
 @Preview
-fun App(sessionDatabase: SessionDatabase) {
+fun App(sessionDatabase: SessionDatabase, context: Any? = null) {
 
     val colors by mutableStateOf(if (isSystemInDarkTheme()) darkScheme else lightScheme)
 
@@ -51,7 +51,7 @@ fun App(sessionDatabase: SessionDatabase) {
                 composable("TimerScreen", deepLinks = listOf(
                     NavDeepLink("CoolTimer://TimerScreen")
                 ))  {
-                    TimerScreen(navHost, timerViewModel)
+                    TimerScreen(navHost, timerViewModel, context)
                 }
             }
         }

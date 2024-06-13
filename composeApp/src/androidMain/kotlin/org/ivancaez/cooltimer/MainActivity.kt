@@ -22,19 +22,15 @@ import org.ivancaez.cooltimer.database.getSessionDatabase
 
 class MainActivity : ComponentActivity() {
 
-    //val localActivity = staticCompositionLocalOf<Activity> { error("No Activity found!") }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val sessionDatabase = getSessionDatabase(applicationContext)
 
-
         setContent {
-            //CompositionLocalProvider(localActivity provides this) {
-                NotificationLauncher()
-                App(sessionDatabase)
-            //}
+            val context = LocalContext.current
+            NotificationLauncher()
+            App(sessionDatabase, context)
         }
     }
 }

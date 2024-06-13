@@ -1,6 +1,3 @@
 package keep_screen_on
 
-expect class KeepScreenOn {
-    fun enable()
-    fun disable()
-}
+expect fun keepScreenOn(context: Any? = null, keepScreenOn: Boolean)

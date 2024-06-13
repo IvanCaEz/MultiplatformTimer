@@ -47,12 +47,13 @@ import com.ivancaez.cooltimer.ui.theme.CooldownTimeColor
 import com.ivancaez.cooltimer.ui.theme.RestTimeColor
 import com.ivancaez.cooltimer.ui.theme.WarmupTimeColor
 import com.ivancaez.cooltimer.ui.theme.WorkTimeColor
+import keep_screen_on.keepScreenOn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
+fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel, context: Any?) {
     val intervals by timerViewModel.intervals.collectAsState()
     val intervalsOriginal by timerViewModel.intervalsOriginal.collectAsState()
     val isWorkTime by timerViewModel.isWorkTime.collectAsState()
@@ -75,6 +76,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                     modifier = Modifier.clickable {
                         navController.popBackStack()
                         timerViewModel.stopTimer()
+                        keepScreenOn(context = context, keepScreenOn = false)
                     }.size(32.dp)
                 )
             })
@@ -159,9 +161,18 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel) {
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary),
                     onClick = {
-                    if(hasStarted && !isPaused) timerViewModel.pauseTimer()
-                    else if (hasStarted && isPaused) timerViewModel.resumeTimer()
-                    else timerViewModel.startTimer()
+                    if(hasStarted && !isPaused) {
+                        timerViewModel.pauseTimer()
+                        keepScreenOn(context = context, keepScreenOn = false)
+                    }
+                    else if (hasStarted && isPaused) {
+                        timerViewModel.resumeTimer()
+                        keepScreenOn(context = context, keepScreenOn = true)
+                    }
+                    else{
+                        timerViewModel.startTimer()
+                        keepScreenOn(context = context, keepScreenOn = true)
+                    }
                 }
                 ) {
                     if (hasStarted && !isPaused) Text(text = "Pausar")
