@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,8 +48,9 @@ import view.timer.TimerViewModel
 @Composable
 fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel, sessionDatabase: SessionDatabase){
 
-    val sessions by sessionDatabase.sessionDao().getAllSessions()
-        .collectAsState(initial = timerViewModel.sessionList.value)
+    val sessions by timerViewModel.sessionList.collectAsState()
+    val isLoading by timerViewModel.isLoading.collectAsState()
+
 
     Scaffold(floatingActionButton = {
         FloatingActionButton(
@@ -63,87 +65,76 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
             )
         }
     }) {
-        if (sessions.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(4.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "No hay sesiones guardadas",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.padding(8.dp))
-            }
+        if (isLoading) {
+            CircularProgressIndicator()
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(vertical = 8.dp, horizontal = 4.dp)
-            ) {
-                items(sessions.size) { index ->
-                    val session = sessions[index]
-                    println(session)
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
-                            .wrapContentHeight()
-                            .clickable {
-                                timerViewModel.setTimer(session)
-                                navController.navigate("TimerScreen")
-                            },
-                        shape = RoundedCornerShape(24.dp),
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                            // Info de la sesión
-                            Column(modifier = Modifier.padding(end = 4.dp).weight(3.5f)) {
-                                // Nombre de la sesión
-                                Text(
-                                    text = buildAnnotatedString {
-                                        withStyle(
-                                            style = SpanStyle(
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.tertiary
-                                            )
-                                        ) {
-                                            append(session.sessionName.ifEmpty { "Sesión #${session.id}" })
-                                        }
-                                        withStyle(
-                                            style = SpanStyle(
-                                                fontSize = 18.sp,
-                                                color = MaterialTheme.colorScheme.primary
+            if (sessions.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "No hay sesiones guardadas",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.padding(8.dp))
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(vertical = 8.dp, horizontal = 4.dp)
+                ) {
+                    items(sessions.size) { index ->
+                        val session = sessions[index]
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
+                                .wrapContentHeight()
+                                .clickable {
+                                    timerViewModel.setTimer(session)
+                                    navController.navigate("TimerScreen")
+                                },
+                            shape = RoundedCornerShape(24.dp),
+                        ) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                                // Info de la sesión
+                                Column(modifier = Modifier.padding(end = 4.dp).weight(3.5f)) {
+                                    // Nombre de la sesión
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            withStyle(
+                                                style = SpanStyle(
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.tertiary
                                                 )
-                                        ) {
-                                            append(" - ")
-                                        }
-                                        withStyle(
-                                            style = SpanStyle(
-                                                color = CooldownTimeColor,
-                                                fontSize = 18.sp,
-                                                fontStyle = FontStyle.Italic
-                                            )
-                                        ) {
-                                            val totalTime = session.intervals * (session.restTime+session.workTime)+ session.warmupTime!! + session.cooldownTime!!
+                                            ) {
+                                                append(session.sessionName.ifEmpty { "Sesión #${session.id}" })
+                                            }
+                                            withStyle(
+                                                style = SpanStyle(
+                                                    fontSize = 18.sp,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            ) {
+                                                append(" - ")
+                                            }
+                                            withStyle(
+                                                style = SpanStyle(
+                                                    color = CooldownTimeColor,
+                                                    fontSize = 18.sp,
+                                                    fontStyle = FontStyle.Italic
+                                                )
+                                            ) {
+                                                val totalTime =
+                                                    session.intervals * (session.restTime + session.workTime) + session.warmupTime!! + session.cooldownTime!!
 
-                                            append(timerViewModel.formatTime(totalTime) + if (totalTime > 59) " min" else " s")
-                                        }                                    },
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = WarmupTimeColor
-                                )
-                                // Intérvalos
-                                Text(
-                                    text = buildAnnotatedString {
-                                        withStyle(
-                                            style = SpanStyle(
-                                                fontWeight = FontWeight.Bold,
-                                            )
-                                        ) {
-                                            append("Intérvalos: ")
-                                        }
-                                        append(session.intervals.toString())
-                                    },
-                                    fontSize = 18.sp
-                                )
-                                // Calentamiento
-                                if (session.warmupTime != 0){
+                                                append(timerViewModel.formatTime(totalTime) + if (totalTime > 59) " min" else " s")
+                                            }
+                                        },
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = WarmupTimeColor
+                                    )
+                                    // Intérvalos
                                     Text(
                                         text = buildAnnotatedString {
                                             withStyle(
@@ -151,43 +142,29 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             ) {
-                                                append("Calentamiento: ")
+                                                append("Intérvalos: ")
                                             }
-                                            append(timerViewModel.formatTime(session.warmupTime!!) + if (session.warmupTime!! > 59) " min" else " s")
+                                            append(session.intervals.toString())
                                         },
                                         fontSize = 18.sp
                                     )
-                                }
-                                // Trabajo
-                                Text(
-                                    text = buildAnnotatedString {
-                                        withStyle(
-                                            style = SpanStyle(
-                                                fontWeight = FontWeight.Bold,
-                                            )
-                                        ) {
-                                            append("Tiempo de trabajo: ")
-                                        }
-                                        append(timerViewModel.formatTime(session.workTime) + if (session.workTime > 59) " min" else " s")
-                                    },
-                                    fontSize = 18.sp
-                                )
-                                // Descanso
-                                Text(
-                                    text = buildAnnotatedString {
-                                        withStyle(
-                                            style = SpanStyle(
-                                                fontWeight = FontWeight.Bold,
-                                            )
-                                        ) {
-                                            append("Tiempo de descanso: ")
-                                        }
-                                        append(timerViewModel.formatTime(session.restTime) + if (session.restTime > 59) " min" else " s")
-                                    },
-                                    fontSize = 18.sp
-                                )
-                                // Enfriamiento
-                                if (session.cooldownTime != 0){
+                                    // Calentamiento
+                                    if (session.warmupTime != 0) {
+                                        Text(
+                                            text = buildAnnotatedString {
+                                                withStyle(
+                                                    style = SpanStyle(
+                                                        fontWeight = FontWeight.Bold,
+                                                    )
+                                                ) {
+                                                    append("Calentamiento: ")
+                                                }
+                                                append(timerViewModel.formatTime(session.warmupTime!!) + if (session.warmupTime!! > 59) " min" else " s")
+                                            },
+                                            fontSize = 18.sp
+                                        )
+                                    }
+                                    // Trabajo
                                     Text(
                                         text = buildAnnotatedString {
                                             withStyle(
@@ -195,68 +172,99 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             ) {
-                                                append("Enfriamiento: ")
+                                                append("Tiempo de trabajo: ")
                                             }
-                                            append(timerViewModel.formatTime(session.cooldownTime!!) + if (session.cooldownTime!! > 59) " min" else " s")
+                                            append(timerViewModel.formatTime(session.workTime) + if (session.workTime > 59) " min" else " s")
                                         },
                                         fontSize = 18.sp
                                     )
-                                }
-                                /*
-                                SessionVisualizer(
-                                    warmupTime = session.warmupTime ?: 0,
-                                    workTime = session.workTime,
-                                    restTime = session.restTime,
-                                    intervals = session.intervals,
-                                    cooldownTime = session.cooldownTime ?: 0,
-                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                                )
-                                 */
+                                    // Descanso
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            withStyle(
+                                                style = SpanStyle(
+                                                    fontWeight = FontWeight.Bold,
+                                                )
+                                            ) {
+                                                append("Tiempo de descanso: ")
+                                            }
+                                            append(timerViewModel.formatTime(session.restTime) + if (session.restTime > 59) " min" else " s")
+                                        },
+                                        fontSize = 18.sp
+                                    )
+                                    // Enfriamiento
+                                    if (session.cooldownTime != 0) {
+                                        Text(
+                                            text = buildAnnotatedString {
+                                                withStyle(
+                                                    style = SpanStyle(
+                                                        fontWeight = FontWeight.Bold,
+                                                    )
+                                                ) {
+                                                    append("Enfriamiento: ")
+                                                }
+                                                append(timerViewModel.formatTime(session.cooldownTime!!) + if (session.cooldownTime!! > 59) " min" else " s")
+                                            },
+                                            fontSize = 18.sp
+                                        )
+                                    }
+                                    /*
+                                    SessionVisualizer(
+                                        warmupTime = session.warmupTime ?: 0,
+                                        workTime = session.workTime,
+                                        restTime = session.restTime,
+                                        intervals = session.intervals,
+                                        cooldownTime = session.cooldownTime ?: 0,
+                                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                                    )
+                                     */
 
-                            }
-                            // Botones de editar y borrar
-                            Column(modifier = Modifier.padding(end = 4.dp).weight(0.5f),
-                                verticalArrangement = Arrangement.SpaceBetween
+                                }
+                                // Botones de editar y borrar
+                                Column(
+                                    modifier = Modifier.padding(end = 4.dp).weight(0.5f),
+                                    verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                IconButton(
-                                    modifier = Modifier.clip(CircleShape),
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    onClick = {
-                                        timerViewModel.setSession(session)
-                                        navController.navigate("SetUpScreen")
-                                    }){
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Edit session")
+                                    IconButton(
+                                        modifier = Modifier.clip(CircleShape),
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        onClick = {
+                                            timerViewModel.setSession(session)
+                                            navController.navigate("SetUpScreen")
+                                        }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit session"
+                                        )
+                                    }
+                                    IconButton(
+                                        modifier = Modifier.clip(CircleShape),
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            contentColor = Color.White,
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                        ),
+                                        onClick = {
+                                            timerViewModel.deleteSession(session, sessionDatabase)
+                                        }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete session"
+                                        )
+                                    }
+
                                 }
-                                IconButton(
-                                    modifier = Modifier.clip(CircleShape),
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        contentColor = Color.White,
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                    ),
-                                    onClick = {
-                                        timerViewModel.deleteSession(session, sessionDatabase)
-                                    }){
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Delete session")
-                                }
+
 
                             }
-
 
                         }
-
                     }
-                }
-
-            }
-
-        }
+                } // End of LazyColumn
+            } // End of session not empty
+        } // End of isLoading
     }
 }
 

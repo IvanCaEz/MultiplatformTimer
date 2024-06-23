@@ -20,12 +20,23 @@ class TimerViewModel(
     private val _sessionList = MutableStateFlow(listOf<Session>())
     val sessionList = _sessionList.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
+
+
     /**
-     * Sets [_sessionList] to the given list
-     * @param sessionList List<Session>
+     * Loads the session list of the user and sets [_sessionList] to the given list and
+     * sets [_isLoading] to false
+     * @param sessionDatabase SessionDatabase
      */
-    fun setSessionList(sessionList: List<Session>) {
-        _sessionList.value = sessionList
+    fun loadSessions(sessionDatabase: SessionDatabase) {
+        viewModelScope.launch {
+            sessionDatabase.sessionDao().getAllSessions()
+                .collect { sessionList ->
+                    _sessionList.value = sessionList
+                    _isLoading.value = false
+                }
+        }
     }
 
     var currentSession: Session? = null
