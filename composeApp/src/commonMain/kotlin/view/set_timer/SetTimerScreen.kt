@@ -481,7 +481,8 @@ fun NumberPad(onNumberClick: (String) -> Unit, onClearClick: () -> Unit) {
                     if (number != "C"){
                         NumberButton(number) { onNumberClick(number) }
                     } else {
-                        NumberButton("C") { onClearClick() }
+                        NumberButton("C", textColor = Color.White,
+                            backgroundColor = MaterialTheme.colorScheme.secondaryContainer) { onClearClick() }
 
                     }
                 }
@@ -491,20 +492,21 @@ fun NumberPad(onNumberClick: (String) -> Unit, onClearClick: () -> Unit) {
 }
 
 @Composable
-fun NumberButton(number: String, onClick: () -> Unit) {
+fun NumberButton(number: String,  backgroundColor: Color = MaterialTheme.colorScheme.primary,
+                 textColor: Color = MaterialTheme.colorScheme.onPrimary , onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(64.dp)
             .padding(8.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary, CircleShape)
+            .background(backgroundColor, CircleShape)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = number,
             fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onPrimary
+            color = textColor
         )
     }
 }
