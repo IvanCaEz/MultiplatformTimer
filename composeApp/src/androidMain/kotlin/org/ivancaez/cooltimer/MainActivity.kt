@@ -18,7 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import localization.Localization
 import org.ivancaez.cooltimer.database.getSessionDatabase
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
@@ -26,11 +28,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val sessionDatabase = getSessionDatabase(applicationContext)
+        val localization: Localization by inject()
 
         setContent {
             val context = LocalContext.current
             NotificationLauncher()
-            App(sessionDatabase, context)
+            App(sessionDatabase, context, localization)
         }
     }
 }

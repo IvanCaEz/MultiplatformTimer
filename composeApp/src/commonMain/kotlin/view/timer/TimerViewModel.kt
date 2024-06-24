@@ -63,6 +63,16 @@ class TimerViewModel(
         }
     }
 
+    /**
+     * Deletes all the sessions from the database
+     * @param sessionDatabase SessionDatabase
+     */
+    fun deleteAllSessions(sessionDatabase: SessionDatabase) {
+        viewModelScope.launch {
+            sessionDatabase.sessionDao().deleteAllSessions()
+        }
+    }
+
 
     private val _remainingTime = MutableStateFlow(0)
     val remainingTime = _remainingTime.asStateFlow()

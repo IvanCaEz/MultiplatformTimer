@@ -11,19 +11,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import database.SessionDatabase
+import localization.Localization
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.currentKoinScope
 import ui.theme.darkScheme
 import ui.theme.lightScheme
 import view.set_timer.SetTimerScreen
+import view.settings.SettingsScreen
 import view.timer.TimerScreen
 import view.timer.TimerViewModel
 import view.timer_list.TimerListScreen
 
 @Composable
 @Preview
-fun App(sessionDatabase: SessionDatabase, context: Any? = null) {
+fun App(sessionDatabase: SessionDatabase, context: Any? = null, localization: Localization) {
 
     val colors by mutableStateOf(if (isSystemInDarkTheme()) darkScheme else lightScheme)
 
@@ -38,16 +40,19 @@ fun App(sessionDatabase: SessionDatabase, context: Any? = null) {
 
                 composable("TimerListScreen") {
 
-                    TimerListScreen(navHost, timerViewModel, sessionDatabase)
+                    TimerListScreen(navHost, timerViewModel, sessionDatabase, localization)
                 }
                 composable("SetUpScreen") {
-                    SetTimerScreen(navHost, timerViewModel, sessionDatabase)
+                    SetTimerScreen(navHost, timerViewModel, sessionDatabase, localization)
+                }
+                composable("SettingsScreen") {
+                    SettingsScreen(navHost,sessionDatabase, localization, timerViewModel)
                 }
 
                 composable("TimerScreen", deepLinks = listOf(
                     NavDeepLink("CoolTimer://TimerScreen")
                 ))  {
-                    TimerScreen(navHost, timerViewModel, context)
+                    TimerScreen(navHost, timerViewModel, context, localization)
                 }
             }
         }

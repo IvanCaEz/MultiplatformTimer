@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">CoolTimer</string>
+    <string name="no_sessions">No hay sesiones guardadas</string>
+    <string name="translate_button">Traducir</string>
+    <string name="intervals">Intervalos: </string>
+    <string name="warmup_time">Calentamiento: </string>
+    <string name="work_time">Tiempo de trabajo: </string>
+    <string name="rest_time">Tiempo de descanso: </string>
+    <string name="cooldown_time">Enfriamiento: </string>
+    <string name="session_name">Nombre de la sesión</string>
+    <string name="interval">Intervalo </string>
+    <string name="warmup">Calentamiento</string>
+    <string name="work">Trabajo</string>
+    <string name="rest">Descanso</string>
+    <string name="cooldown">Enfriamiento</string>
+    <string name="start_timer">Iniciar Timer</string>
+    <string name="finished">¡Acabado!</string>
+    <string name="prepare">Prepárate</string>
+    <string name="begin">Empezar</string>
+    <string name="pause">Pausar</string>
+    <string name="resume">Reanudar</string>
+    <string name="end">Detener</string>
+    <string name="settings">Ajustes</string>
+    <string name="delete_sessions">Eliminar todas las sesiones</string>
+    <string name="show_timeline">Mostrar línea de Sesión</string>
+
+
+</resources>

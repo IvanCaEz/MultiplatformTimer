@@ -60,11 +60,15 @@ import com.ivancaez.cooltimer.ui.theme.WorkTimeColor
 import data.Field
 import database.Session
 import database.SessionDatabase
+import localization.Localization
 import view.timer.TimerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel, sessionDatabase: SessionDatabase) {
+fun SetTimerScreen(
+    navController: NavController,  timerViewModel: TimerViewModel,
+    sessionDatabase: SessionDatabase, localization: Localization
+) {
     val intervals by timerViewModel.intervalsOriginal.collectAsState()
     // WarmUp
     val warmupMinutes by timerViewModel.warmupMinutes.collectAsState()
@@ -116,7 +120,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 // Nombre
                 NameInputField(
                     modifier = Modifier,
-                    label = "Nombre de la sesión",
+                    label = localization.getString("session_name"),
                     value = sessionName,
                     selected = selectedField == Field.NAME,
                     onClick = {
@@ -131,7 +135,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 // Intérvalos
                 IntervalsInputField(
                     modifier = Modifier,
-                    label = "Intérvalos",
+                    label = localization.getString("intervals"),
                     value = intervals,
                     selected = selectedField == Field.ROUNDS,
                     onClick = {
@@ -149,7 +153,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center) {
                 TimeInputField(
-                    label = "Calentamiento",
+                    label = localization.getString("warmup"),
                     value = "$warmupMinutes:$warmupSeconds",
                     selected = selectedField == Field.WARMUP,
                     onClick = {
@@ -161,7 +165,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 )
 
                 TimeInputField(
-                    label = "Enfriamiento",
+                    label = localization.getString("cooldown"),
                     value = "$cooldownMinutes:$cooldownSeconds",
                     selected = selectedField == Field.COOLDOWN,
                     onClick = {
@@ -177,7 +181,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center) {
                 TimeInputField(
-                    label = "Trabajo",
+                    label = localization.getString("work"),
                     value = "$workMinutes:$workSeconds",
                     selected = selectedField == Field.WORK,
                     onClick = {
@@ -190,7 +194,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                 )
 
                 TimeInputField(
-                    label = "Descanso",
+                    label = localization.getString("rest"),
                     value = "$restMinutes:$restSeconds",
                     selected = selectedField == Field.REST,
                     onClick = {
@@ -279,7 +283,7 @@ fun SetTimerScreen(navController: NavController,  timerViewModel: TimerViewModel
                     val totalRestTime = restMinutes.toInt() * 60 + restSeconds.toInt()
                     timerViewModel.validateSession(intervals.toInt(), totalWorkTime, totalRestTime)
             }) {
-                Text("Iniciar Timer")
+                Text(localization.getString("start_timer"))
             }
         }
         LaunchedEffect(canProceed) {

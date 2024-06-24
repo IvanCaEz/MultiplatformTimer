@@ -50,10 +50,13 @@ import com.ivancaez.cooltimer.ui.theme.WorkTimeColor
 import keep_screen_on.keepScreenOn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import localization.Localization
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel, context: Any?) {
+fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel,
+                context: Any?, localization: Localization
+) {
     val intervals by timerViewModel.intervals.collectAsState()
     val intervalsOriginal by timerViewModel.intervalsOriginal.collectAsState()
     val isWorkTime by timerViewModel.isWorkTime.collectAsState()
@@ -85,20 +88,20 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel, co
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Text(text = "Intérvalo ${if (intervals == intervalsOriginal.toInt()) intervalsOriginal else intervals + 1}/$intervalsOriginal", style = MaterialTheme.typography.headlineLarge)
+            Text(text = "${localization.getString("interval")} ${if (intervals == intervalsOriginal.toInt()) intervalsOriginal else intervals + 1}/$intervalsOriginal", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.padding(8.dp))
             Text(text = if (isWorkTime) {
-                "Trabajo"
+                localization.getString("work")
             } else if (isCooldownTime){
-                "Enfriamiento"
+                localization.getString("cooldown")
             } else if (isWarmupTime){
-                "Calentamiento"
+                localization.getString("warmup")
             } else if (intervals == intervalsOriginal.toInt() && !hasStarted){
-                "¡Acabado!"
+                localization.getString("finished")
             } else if (intervals != intervalsOriginal.toInt() && !hasStarted) {
-                "Prepárate"
+                localization.getString("prepare")
             } else {
-                "Descanso"
+                localization.getString("rest")
                    },
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
@@ -175,9 +178,9 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel, co
                     }
                 }
                 ) {
-                    if (hasStarted && !isPaused) Text(text = "Pausar")
-                    else if (hasStarted && isPaused) Text(text = "Reanudar")
-                    else Text(text = "Empezar")
+                    if (hasStarted && !isPaused) Text(text = localization.getString("pause"))
+                    else if (hasStarted && isPaused) Text(text = localization.getString("resume"))
+                    else Text(text = localization.getString("begin"))
                 }
                 if (isPaused) {
                     Row(modifier = Modifier.padding(start = 10.dp)){
@@ -186,7 +189,7 @@ fun TimerScreen(navController: NavController, timerViewModel: TimerViewModel, co
                                 containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = MaterialTheme.colorScheme.onTertiary
                             )) {
-                            Text(text = "Detener")
+                            Text(text = localization.getString("end"))
                         }
                     }
                 }

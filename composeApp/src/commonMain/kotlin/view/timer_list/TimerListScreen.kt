@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -43,28 +43,47 @@ import androidx.navigation.NavController
 import com.ivancaez.cooltimer.ui.theme.CooldownTimeColor
 import com.ivancaez.cooltimer.ui.theme.WarmupTimeColor
 import database.SessionDatabase
+import localization.Localization
 import view.timer.TimerViewModel
 
 @Composable
-fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel, sessionDatabase: SessionDatabase){
+fun TimerListScreen(
+    navController: NavController, timerViewModel: TimerViewModel,
+    sessionDatabase: SessionDatabase, localization: Localization
+){
 
     val sessions by timerViewModel.sessionList.collectAsState()
     val isLoading by timerViewModel.isLoading.collectAsState()
 
 
     Scaffold(floatingActionButton = {
-        FloatingActionButton(
-            onClick = {
-                navController.navigate("SetUpScreen")
-            },
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add session"
-            )
+        Column {
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate("SettingsScreen")
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings button"
+                )
+            }
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate("SetUpScreen")
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add session"
+                )
+            }
         }
+
     }) {
+
         if (isLoading) {
             CircularProgressIndicator()
         } else {
@@ -75,20 +94,20 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "No hay sesiones guardadas",
+                        text = localization.getString("no_sessions"),
                         style = MaterialTheme.typography.titleLarge
                     )
                     Spacer(modifier = Modifier.padding(8.dp))
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(vertical = 8.dp, horizontal = 4.dp)
+                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
                 ) {
+
                     items(sessions.size) { index ->
                         val session = sessions[index]
                         Card(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
-                                .wrapContentHeight()
                                 .clickable {
                                     timerViewModel.setTimer(session)
                                     navController.navigate("TimerScreen")
@@ -107,7 +126,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                     color = MaterialTheme.colorScheme.tertiary
                                                 )
                                             ) {
-                                                append(session.sessionName.ifEmpty { "Sesión #${session.id}" })
+                                                append(session.sessionName.ifEmpty { "#${session.id}" })
                                             }
                                             withStyle(
                                                 style = SpanStyle(
@@ -142,7 +161,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             ) {
-                                                append("Intérvalos: ")
+                                                append(localization.getString("intervals") + " ")
                                             }
                                             append(session.intervals.toString())
                                         },
@@ -157,7 +176,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                         fontWeight = FontWeight.Bold,
                                                     )
                                                 ) {
-                                                    append("Calentamiento: ")
+                                                    append(localization.getString("warmup_time") + " ")
                                                 }
                                                 append(timerViewModel.formatTime(session.warmupTime!!) + if (session.warmupTime!! > 59) " min" else " s")
                                             },
@@ -172,7 +191,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             ) {
-                                                append("Tiempo de trabajo: ")
+                                                append(localization.getString("work_time") + " ")
                                             }
                                             append(timerViewModel.formatTime(session.workTime) + if (session.workTime > 59) " min" else " s")
                                         },
@@ -186,7 +205,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                     fontWeight = FontWeight.Bold,
                                                 )
                                             ) {
-                                                append("Tiempo de descanso: ")
+                                                append(localization.getString("rest_time") + " ")
                                             }
                                             append(timerViewModel.formatTime(session.restTime) + if (session.restTime > 59) " min" else " s")
                                         },
@@ -201,7 +220,7 @@ fun TimerListScreen(navController: NavController, timerViewModel: TimerViewModel
                                                         fontWeight = FontWeight.Bold,
                                                     )
                                                 ) {
-                                                    append("Enfriamiento: ")
+                                                    append(localization.getString("cooldown_time") + " ")
                                                 }
                                                 append(timerViewModel.formatTime(session.cooldownTime!!) + if (session.cooldownTime!! > 59) " min" else " s")
                                             },
