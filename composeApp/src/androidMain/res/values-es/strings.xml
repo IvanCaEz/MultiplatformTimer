@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CoolTimer</string>
     <string name="no_sessions">No hay sesiones guardadas</string>
-    <string name="translate_button">Traducir</string>
+    <string name="translate_button">Cambiar idioma</string>
     <string name="intervals">Intervalos: </string>
     <string name="warmup_time">Calentamiento: </string>
     <string name="work_time">Tiempo de trabajo: </string>
@@ -22,7 +22,7 @@
     <string name="end">Detener</string>
     <string name="settings">Ajustes</string>
     <string name="delete_sessions">Eliminar todas las sesiones</string>
-    <string name="show_timeline">Mostrar línea de Sesión</string>
+    <string name="show_timeline">Mostrar desglose de sesión</string>
 
 
 </resources>

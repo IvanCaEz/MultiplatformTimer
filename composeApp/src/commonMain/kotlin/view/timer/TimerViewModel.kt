@@ -133,7 +133,7 @@ class TimerViewModel(
         timerJob = viewModelScope.launch {
             timerNotificationManager.startTimerNotification(
                 remainingTime = remainingTime.value,
-                period = if (_isWarmupTime.value) "Calentamiento" else "Trabajo"
+                period = if (_isWarmupTime.value) "warmup" else "work"
             )
             while (hasStarted.value) {
                 // Empieza el tiempo de calentamiento
@@ -144,7 +144,7 @@ class TimerViewModel(
                         _remainingTime.value = _warmupTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Calentamiento")
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "warmup")
                         delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
@@ -163,7 +163,7 @@ class TimerViewModel(
                         _remainingTime.value = _cooldownTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Enfriamiento")
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "cooldown")
                         delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
@@ -183,7 +183,7 @@ class TimerViewModel(
                         _remainingTime.value = _workTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Trabajo")
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "work")
                         delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {
@@ -201,7 +201,7 @@ class TimerViewModel(
                         _remainingTime.value = _restTime.value
                     }
                     while (_remainingTime.value > -1 ) {
-                        timerNotificationManager.updateTimerNotification(remainingTime.value, "Descanso")
+                        timerNotificationManager.updateTimerNotification(remainingTime.value, "rest")
                         delay(1000)
                         _remainingTime.value--
                         if (_remainingTime.value == 3) {

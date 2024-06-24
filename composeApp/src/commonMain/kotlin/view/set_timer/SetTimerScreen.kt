@@ -275,8 +275,8 @@ fun SetTimerScreen(
             // Botón de empezar
             ElevatedButton(
                 colors = ButtonDefaults.elevatedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
                 ),
                 onClick = {
                     val totalWorkTime = workMinutes.toInt() * 60 + workSeconds.toInt()

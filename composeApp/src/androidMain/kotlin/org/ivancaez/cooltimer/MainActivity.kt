@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import localization.Localization
 import org.ivancaez.cooltimer.database.getSessionDatabase
 import org.koin.android.ext.android.inject
+import session_visualizer.SessionVisualizer
 
 class MainActivity : ComponentActivity() {
 
@@ -29,11 +30,12 @@ class MainActivity : ComponentActivity() {
 
         val sessionDatabase = getSessionDatabase(applicationContext)
         val localization: Localization by inject()
+        val sessionVisualizer: SessionVisualizer by inject()
 
         setContent {
             val context = LocalContext.current
             NotificationLauncher()
-            App(sessionDatabase, context, localization)
+            App(sessionDatabase, context, localization, sessionVisualizer)
         }
     }
 }

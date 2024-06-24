@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,6 +42,7 @@ import database.SessionDatabase
 import localization.Localization
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import session_visualizer.SessionVisualizer
 import view.timer.TimerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,14 +50,23 @@ import view.timer.TimerViewModel
 fun SettingsScreen(
     navController: NavController, sessionDatabase: SessionDatabase,
     localization: Localization, timerViewModel: TimerViewModel,
+    sessionVisualizer: SessionVisualizer,
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     var language by remember { mutableStateOf(localization.getLanguage()) }
 
-    val languageChanged by settingsViewModel.hasChanged.collectAsState()
+    val languageChanged by settingsViewModel.langHasChanged.collectAsState()
+
+    val visualizerChanged by settingsViewModel.visualizerHasChanged.collectAsState()
+
+    var showVisualizer by remember { mutableStateOf(sessionVisualizer.getPrefs()) }
 
     if (languageChanged) {
         language = localization.getLanguage()
+    }
+
+    if (visualizerChanged) {
+        showVisualizer = sessionVisualizer.getPrefs()
     }
 
     Scaffold (topBar = {
@@ -79,14 +89,14 @@ fun SettingsScreen(
             .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LanguageSwitcher(localization, settingsViewModel)
-            SettingsItem(
-                imageVector = Icons.Default.Build,
-                onClick = {
-
-                },
+            LanguageSwitcher(
+                localization = localization,
+                settingsViewModel = settingsViewModel
+            )
+            VisualizerItem(
                 text = localization.getString("show_timeline"),
-                hasTint = false
+                sessionVisualizer = sessionVisualizer,
+                settingsViewModel = settingsViewModel
             )
             SettingsItem(
                 imageVector = Icons.Default.Delete,
@@ -107,7 +117,7 @@ fun LanguageSwitcher(localization: Localization, settingsViewModel: SettingsView
 
     Row(modifier = Modifier
         .fillMaxWidth()
-        .padding(8.dp),
+        .padding(horizontal = 8.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
 
@@ -142,19 +152,51 @@ fun LanguageSwitcher(localization: Localization, settingsViewModel: SettingsView
         }
     }
     HorizontalDivider(
+        color = MaterialTheme.colorScheme.onSurface,
+        thickness = 1.dp,
+
+    )
+}
+
+@Composable
+fun VisualizerItem(text: String, sessionVisualizer: SessionVisualizer,
+                   settingsViewModel: SettingsViewModel) {
+    var showVisualizer by remember { mutableStateOf(sessionVisualizer.getPrefs()) }
+
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+
+        Text(text = text,
+            fontSize = 18.sp)
+
+        Checkbox(
+            checked = showVisualizer,
+            onCheckedChange = {
+                showVisualizer = it
+                sessionVisualizer.updatePrefs(it)
+                settingsViewModel.toggleVisualizer()
+            }
+        )
+    }
+    HorizontalDivider(
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.onSurface
     )
-
 }
+
 @Composable
 fun SettingsItem(imageVector: ImageVector, onClick : () -> Unit, text: String, hasTint: Boolean) {
+
     Row(modifier = Modifier
         .fillMaxWidth()
-        .padding(8.dp)
         .clickable {
             onClick()
-        },
+        }
+        .padding(start = 8.dp, top = 16.dp, bottom = 16.dp, end = 16.dp)
+        ,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
 
@@ -173,5 +215,4 @@ fun SettingsItem(imageVector: ImageVector, onClick : () -> Unit, text: String, h
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.onSurface
     )
-
 }

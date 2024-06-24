@@ -15,6 +15,7 @@ import localization.Localization
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.currentKoinScope
+import session_visualizer.SessionVisualizer
 import ui.theme.darkScheme
 import ui.theme.lightScheme
 import view.set_timer.SetTimerScreen
@@ -25,7 +26,8 @@ import view.timer_list.TimerListScreen
 
 @Composable
 @Preview
-fun App(sessionDatabase: SessionDatabase, context: Any? = null, localization: Localization) {
+fun App(sessionDatabase: SessionDatabase, context: Any? = null,
+        localization: Localization, sessionVisualizer: SessionVisualizer) {
 
     val colors by mutableStateOf(if (isSystemInDarkTheme()) darkScheme else lightScheme)
 
@@ -40,13 +42,13 @@ fun App(sessionDatabase: SessionDatabase, context: Any? = null, localization: Lo
 
                 composable("TimerListScreen") {
 
-                    TimerListScreen(navHost, timerViewModel, sessionDatabase, localization)
+                    TimerListScreen(navHost, timerViewModel, sessionDatabase, localization, sessionVisualizer)
                 }
                 composable("SetUpScreen") {
                     SetTimerScreen(navHost, timerViewModel, sessionDatabase, localization)
                 }
                 composable("SettingsScreen") {
-                    SettingsScreen(navHost,sessionDatabase, localization, timerViewModel)
+                    SettingsScreen(navHost,sessionDatabase, localization, timerViewModel, sessionVisualizer)
                 }
 
                 composable("TimerScreen", deepLinks = listOf(

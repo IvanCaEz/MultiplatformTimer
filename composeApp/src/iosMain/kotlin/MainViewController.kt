@@ -2,8 +2,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
 import database.getSessionDatabase
 import di.KoinInitializer
+import localization.LocalizationIos
 import platform.UserNotifications.UNUserNotificationCenter
 import platform.UserNotifications.UNAuthorizationOptions
+import session_visualizer.SessionVisualizerIos
 
 fun MainViewController() = ComposeUIViewController(
     configure = {
@@ -20,5 +22,7 @@ fun MainViewController() = ComposeUIViewController(
             }
         })
     val sessionDatabase = remember { getSessionDatabase() }
-    App(sessionDatabase)
+    val sessionVisualizer = remember { SessionVisualizerIos()}
+    val localization = remember { LocalizationIos() }
+    App(sessionDatabase = sessionDatabase, localization = localization, sessionVisualizer = sessionVisualizer)
 }

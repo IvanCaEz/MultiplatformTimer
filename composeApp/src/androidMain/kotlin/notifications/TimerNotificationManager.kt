@@ -9,6 +9,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import localization.LocalizationAndroid
 import org.ivancaez.cooltimer.CoolTimerApp
 import org.ivancaez.cooltimer.R
 
@@ -60,7 +61,7 @@ actual class TimerNotificationManager {
             PendingIntent.getActivity(context, 200, notificationIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle(period)
+            .setContentTitle(LocalizationAndroid(context).getString(period))
             .setContentText(remainingTime)
             .setSmallIcon(R.drawable.baseline_alarm_24)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -78,7 +79,7 @@ actual class TimerNotificationManager {
      */
     actual fun startTimerNotification(remainingTime: Int, period: String) {
         val timeLeft = formatTime(remainingTime)+ if (remainingTime > 59) " min" else " s"
-        val notification = getNotification(timeLeft, period)
+        val notification = getNotification(timeLeft, LocalizationAndroid(context).getString(period))
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
@@ -92,7 +93,7 @@ actual class TimerNotificationManager {
         val timeLeft = formatTime(remainingTime)+ if (remainingTime > 59) " min" else " s"
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_alarm_24)
-            .setContentTitle(period)
+            .setContentTitle(LocalizationAndroid(context).getString(period))
             .setContentText(timeLeft)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOnlyAlertOnce(true)
