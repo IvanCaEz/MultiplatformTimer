@@ -10,7 +10,8 @@
 
 ## Introduction
 CoolTimer is made with modern Android techniques in Jetpack Compose Multiplatform targeting Android and iOS.
-It's main purpose is to provide a user friendly interface and ready to use app for setting intervals with work and rest periods.
+It's main purpose is to provide a user friendly interface and ready to use app for setting intervals with warm up, work, rest and cooldown periods.
+It's available in 🇬🇧 English and 🇪🇸 Spanish.
 
 ## Download
 Go to [Releases](https://github.com/IvanCaEz/MultiplatformTimer/releases) to download the latest APK.
@@ -29,7 +30,7 @@ Go to [Releases](https://github.com/IvanCaEz/MultiplatformTimer/releases) to dow
 - [Material-Components](https://github.com/material-components/material-components-android?tab=readme-ov-file): Material design components for building UI components.
 
 ## Demo
-https://github.com/IvanCaEz/MultiplatformTimer/assets/125135728/55c19e1e-8ac7-4140-ad75-8e867c753344
+https://github.com/IvanCaEz/MultiplatformTimer/assets/125135728/ddeac788-c3f2-4639-9eea-481222bb1bad
 
 
 ## License
