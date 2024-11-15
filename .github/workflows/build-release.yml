@@ -36,6 +36,9 @@ jobs:
         env:
           KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
 
+      - name: List files for debugging
+        run: ls -la ${{ github.workspace }}/composeApp
+
       - name: Build APK
         run: ./gradlew assembleRelease
         env:
