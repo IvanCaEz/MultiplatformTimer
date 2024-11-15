@@ -105,8 +105,8 @@ android {
         create("release") {
             storeFile = file(localProperties["KEYSTORE_FILE"] ?: "$projectDir/keystore.jks" )
             storePassword = (localProperties["KEYSTORE_PASSWORD"]  ?: System.getenv("KEYSTORE_PASSWORD")).toString()
-            keyAlias = (localProperties["KEY_ALIAS"] ?: System.getenv("KEYSTORE_PASSWORD")).toString()
-            keyPassword = (localProperties["KEY_PASSWORD"]  ?: System.getenv("KEYSTORE_PASSWORD")).toString()
+            keyAlias = (localProperties["KEY_ALIAS"] ?: System.getenv("KEY_ALIAS")).toString()
+            keyPassword = (localProperties["KEY_PASSWORD"]  ?: System.getenv("KEY_PASSWORD")).toString()
         }
     }
 
