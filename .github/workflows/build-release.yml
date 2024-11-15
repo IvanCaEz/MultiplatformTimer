@@ -32,7 +32,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Decode keystore
-        run: echo "$KEYSTORE_FILE" | base64 --decode > ${{ github.workspace }}/keystore.jks
+        run: echo "$KEYSTORE_FILE" | base64 --decode > ${{ github.workspace }}/composeApp/keystore.jks
         env:
           KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
 
