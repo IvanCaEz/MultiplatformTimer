@@ -56,27 +56,3 @@ jobs:
         with:
           name: CoolTimer.apk
           path: composeApp/build/outputs/apk/release/composeApp-release.apk
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1.14.0
-        with:
-          tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            ## Changes
-            - Reduced APK size.
-            
-            https://github.com/IvanCaEz/MultiplatformTimer/assets/125135728/ddeac788-c3f2-4639-9eea-481222bb1bad
-            
-            **Full Changelog**: ${{ env.changelog }}
-          artifacts: composeApp/build/outputs/apk/release/composeApp-release.apk
-          allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN  }}
