@@ -11,7 +11,11 @@ plugins {
 
 val localPropertiesFile = rootProject.file("local.properties")
 val localProperties = Properties()
-localProperties.load(localPropertiesFile.inputStream())
+
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 
 kotlin {
     applyDefaultHierarchyTemplate()
