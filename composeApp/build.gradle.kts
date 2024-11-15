@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -6,6 +8,10 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.ksp)
 }
+
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = Properties()
+localProperties.load(localPropertiesFile.inputStream())
 
 kotlin {
     applyDefaultHierarchyTemplate()
@@ -90,6 +96,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        create("release") {
+            storeFile = file(localProperties["KEYSTORE_FILE"] ?: System.getenv("KEYSTORE_FILE") ?: "$projectDir/keystore.jks" )
+            storePassword = (localProperties["KEYSTORE_PASSWORD"]  ?: System.getenv("KEYSTORE_PASSWORD")).toString()
+            keyAlias = (localProperties["KEY_ALIAS"] ?: System.getenv("KEYSTORE_PASSWORD")).toString()
+            keyPassword = (localProperties["KEY_PASSWORD"]  ?: System.getenv("KEYSTORE_PASSWORD")).toString()
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -98,6 +113,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
