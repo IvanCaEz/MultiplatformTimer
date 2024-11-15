@@ -100,6 +100,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    println("projectdir path: $projectDir")
+    println("Keystore file path: ${localProperties["KEYSTORE_FILE"] ?: System.getenv("KEYSTORE_FILE") ?: "$projectDir/keystore.jks"}")
+    println("keystore path $projectDir/keystore.jks")
+
     signingConfigs {
         create("release") {
             storeFile = file(localProperties["KEYSTORE_FILE"] ?: System.getenv("KEYSTORE_FILE") ?: "$projectDir/keystore.jks" )
