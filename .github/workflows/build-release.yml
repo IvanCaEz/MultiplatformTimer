@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4.4.3
         with:
           name: CoolTimer.apk
-          path: composeApp/release/composeApp-release.apk
+          path: app/build/outputs/apk/release/composeApp-release.apk
 
   release:
     needs: build
@@ -73,5 +73,5 @@ jobs:
             https://github.com/IvanCaEz/MultiplatformTimer/assets/125135728/ddeac788-c3f2-4639-9eea-481222bb1bad
             
             **Full Changelog**: ${{ env.changelog }}
-          artifacts: composeApp/release/composeApp-release.apk
+          artifacts: app/build/outputs/apk/release/composeApp-release.apk
           allowUpdates: true
