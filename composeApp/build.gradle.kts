@@ -100,13 +100,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    println("projectdir path: $projectDir")
-    println("Keystore file path: ${localProperties["KEYSTORE_FILE"] ?: System.getenv("KEYSTORE_FILE") ?: "$projectDir/keystore.jks"}")
-    println("keystore path $projectDir/keystore.jks")
 
     signingConfigs {
         create("release") {
-            storeFile = file(localProperties["KEYSTORE_FILE"] ?: System.getenv("KEYSTORE_FILE") ?: "$projectDir/keystore.jks" )
+            storeFile = file(localProperties["KEYSTORE_FILE"] ?: System.getenv("KEYSTORE_FILE") ?: "$rootDir/keystore.jks" )
             storePassword = (localProperties["KEYSTORE_PASSWORD"]  ?: System.getenv("KEYSTORE_PASSWORD")).toString()
             keyAlias = (localProperties["KEY_ALIAS"] ?: System.getenv("KEYSTORE_PASSWORD")).toString()
             keyPassword = (localProperties["KEY_PASSWORD"]  ?: System.getenv("KEYSTORE_PASSWORD")).toString()
